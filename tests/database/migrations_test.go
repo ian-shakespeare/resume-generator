@@ -1,46 +1,25 @@
 package database_test
 
 import (
-	"database/sql"
-	"fmt"
 	"os"
 	"resumegenerator/internal/database"
+	"resumegenerator/tests"
 	"strconv"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const TEST_DB_NAME string = "testing.db"
-
-func setup(t *testing.T) {
-	file, err := os.Create(TEST_DB_NAME)
-	if err != nil {
-		t.Fatalf("setup %s", err.Error())
-	}
-	file.Close()
-}
-
-func tearDown(t *testing.T) {
-	err := os.Remove(TEST_DB_NAME)
-	if err != nil {
-		t.Fatalf("teardown %s", err.Error())
-	}
-}
-
-func formatExpected(expected string, received string) string {
-	return fmt.Sprintf("expected %s, received %s", expected, received)
-}
-
 func TestMigrateUp(t *testing.T) {
 	setup(t)
 	defer tearDown(t)
 
 	// Arrange
-	db, err := sql.Open("sqlite3", TEST_DB_NAME)
+	db, err := database.NewSQLite(TEST_DB_NAME)
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
+	defer db.DB().Close()
 	query := `
 CREATE TABLE migrate_test_up (
   id INT PRIMARY KEY
@@ -49,32 +28,32 @@ CREATE TABLE migrate_test_up (
 	// Act
 	err = database.MigrateUp(db, 1, query)
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
 
 	// Assert
-	userVersionRow := db.QueryRow("PRAGMA user_version")
+	userVersionRow := db.DB().QueryRow("PRAGMA user_version")
 	if userVersionRow == nil {
-		t.Fatal(formatExpected("*sql.row", "nil"))
+		t.Fatal(tests.FormatExpected("*sql.row", "nil"))
 	}
 	userVersionBytes := make([]byte, 1)
 	err = userVersionRow.Scan(&userVersionBytes)
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
 
 	userVersion, err := strconv.Atoi(string(userVersionBytes))
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
 
 	if userVersion != 1 {
-		t.Fatal(formatExpected("1", string(userVersionBytes)))
+		t.Fatal(tests.FormatExpected("1", string(userVersionBytes)))
 	}
 
-	_, err = db.Exec("INSERT INTO migrate_test_up (id) VALUES (1)")
+	_, err = db.DB().Exec("INSERT INTO migrate_test_up (id) VALUES (1)")
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
 }
 
@@ -83,17 +62,53 @@ func TestMigrateUpToZero(t *testing.T) {
 	defer tearDown(t)
 
 	// Arrange
-	db, err := sql.Open("sqlite3", TEST_DB_NAME)
+	db, err := database.NewSQLite(TEST_DB_NAME)
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
+	defer db.DB().Close()
 
 	// Act
 	err = database.MigrateUp(db, 0, "")
 
 	// Assert
 	if err == nil {
-		t.Fatal(formatExpected("error", "nil"))
+		t.Fatal(tests.FormatExpected("error", "nil"))
+	}
+}
+
+func TestMigrateUpExisting(t *testing.T) {
+	setup(t)
+	defer tearDown(t)
+
+	// Arrange
+	db, err := database.NewSQLite(TEST_DB_NAME)
+	if err != nil {
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
+	}
+	defer db.DB().Close()
+
+	query1 := `
+CREATE TABLE migrate_test_up_existing1 (
+  id INT PRIMARY KEY
+)`
+
+	err = database.MigrateUp(db, 1, query1)
+	if err != nil {
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
+	}
+
+	query2 := `
+CREATE TABLE migrate_test_up_existing2 (
+  id INT PRIMARY KEY
+)`
+
+	// Act
+	err = database.MigrateUp(db, 1, query2)
+
+	// Assert
+	if err == nil {
+		t.Fatal(tests.FormatExpected("error", "nil"))
 	}
 }
 
@@ -102,10 +117,11 @@ func TestMigrateDown(t *testing.T) {
 	defer tearDown(t)
 
 	// Arrange
-	db, err := sql.Open("sqlite3", TEST_DB_NAME)
+	db, err := database.NewSQLite(TEST_DB_NAME)
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
+	defer db.DB().Close()
 
 	upQuery := `
 CREATE TABLE migrate_test_down (
@@ -114,38 +130,38 @@ CREATE TABLE migrate_test_down (
 
 	err = database.MigrateUp(db, 1, upQuery)
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
 
 	// Act
 	err = database.MigrateDown(db, 1, "DROP TABLE migrate_test_down")
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
 
 	// Assert
-	userVersionRow := db.QueryRow("PRAGMA user_version")
+	userVersionRow := db.DB().QueryRow("PRAGMA user_version")
 	if userVersionRow == nil {
-		t.Fatal(formatExpected("*sql.Row", "nil"))
+		t.Fatal(tests.FormatExpected("*sql.Row", "nil"))
 	}
 	userVersionBytes := make([]byte, 1)
 	err = userVersionRow.Scan(&userVersionBytes)
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
 
 	userVersion, err := strconv.Atoi(string(userVersionBytes))
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
 
 	if userVersion != 0 {
-		t.Fatal(formatExpected("0", string(userVersionBytes)))
+		t.Fatal(tests.FormatExpected("0", string(userVersionBytes)))
 	}
 
-	_, err = db.Exec("INSERT INTO migrate_test_down (id) VALUES (1)")
+	_, err = db.DB().Exec("INSERT INTO migrate_test_down (id) VALUES (1)")
 	if err == nil {
-		t.Fatal(formatExpected("error", "nil"))
+		t.Fatal(tests.FormatExpected("error", "nil"))
 	}
 }
 
@@ -154,16 +170,73 @@ func TestMigrateDownPastZero(t *testing.T) {
 	defer tearDown(t)
 
 	// Arrange
-	db, err := sql.Open("sqlite3", TEST_DB_NAME)
+	db, err := database.NewSQLite(TEST_DB_NAME)
 	if err != nil {
-		t.Fatal(formatExpected("nil", err.Error()))
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
 	}
+	defer db.DB().Close()
 
 	// Act
 	err = database.MigrateDown(db, 0, "")
 
 	// Assert
 	if err == nil {
-		t.Fatal(formatExpected("error", "nil"))
+		t.Fatal(tests.FormatExpected("error", "nil"))
+	}
+}
+
+func TestMigrateDownNonExisting(t *testing.T) {
+	setup(t)
+	defer tearDown(t)
+
+	// Arrange
+	db, err := database.NewSQLite(TEST_DB_NAME)
+	if err != nil {
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
+	}
+	defer db.DB().Close()
+
+	// Act
+	err = database.MigrateDown(db, 1, "")
+
+	// Assert
+	if err == nil {
+		t.Fatal(tests.FormatExpected("error", "nil"))
+	}
+}
+
+func TestMigrations(t *testing.T) {
+	// Arrange
+	testDbConn, exists := os.LookupEnv("TEST_DB_CONN")
+	if !exists {
+		t.Fatal(tests.FormatExpected("true", "false"))
+	}
+
+	db, err := database.NewPostgres(testDbConn)
+	if err != nil {
+		t.Fatal(tests.FormatExpected("nil", err.Error()))
+	}
+	defer db.DB().Close()
+
+	forwards := database.ForwardMigrations()
+	for i := 0; i < len(forwards); i += 1 {
+		// Act
+		err = database.MigrateUp(db, i+1, forwards[i])
+
+		// Assert
+		if err != nil {
+			t.Fatal(tests.FormatExpected("nil", err.Error()))
+		}
+	}
+
+	backwards := database.BackwardMigrations()
+	for i := len(backwards) - 1; i >= 0; i -= 1 {
+		// Act
+		err = database.MigrateDown(db, i+1, backwards[i])
+
+		// Assert
+		if err != nil {
+			t.Fatal(tests.FormatExpected("nil", err.Error()))
+		}
 	}
 }

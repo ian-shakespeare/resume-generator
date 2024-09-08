@@ -18,4 +18,4 @@ clean:
 	go clean
 	rm -f $(BIN)
 
-.PHONY: all build run clean
+.PHONY: all build run clean test
