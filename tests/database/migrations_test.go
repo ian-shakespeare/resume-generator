@@ -1,101 +1,70 @@
 package database_test
 
 import (
-	"os"
 	"resumegenerator/internal/database"
-	"resumegenerator/tests"
-	"strconv"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestMigrateUp(t *testing.T) {
-	setup(t)
-	defer tearDown(t)
+	db := setup(t)
+	defer tearDown(t, db)
 
 	// Arrange
-	db, err := database.NewSQLite(TEST_DB_NAME)
-	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-	defer db.DB().Close()
 	query := `
 CREATE TABLE migrate_test_up (
   id INT PRIMARY KEY
 )`
 
 	// Act
-	err = database.MigrateUp(db, 1, query)
+	err := database.MigrateUp(db, 1, query)
 	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
 	}
 
 	// Assert
-	userVersionRow := db.DB().QueryRow("PRAGMA user_version")
-	if userVersionRow == nil {
-		t.Fatal(tests.FormatExpected("*sql.row", "nil"))
-	}
-	userVersionBytes := make([]byte, 1)
-	err = userVersionRow.Scan(&userVersionBytes)
+	userVersion, err := db.GetCurrentVersion()
 	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-
-	userVersion, err := strconv.Atoi(string(userVersionBytes))
-	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
 	}
 
 	if userVersion != 1 {
-		t.Fatal(tests.FormatExpected("1", string(userVersionBytes)))
+		t.Fatalf("expected %s, received %d", "1", userVersion)
 	}
 
 	_, err = db.DB().Exec("INSERT INTO migrate_test_up (id) VALUES (1)")
 	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
 	}
 }
 
 func TestMigrateUpToZero(t *testing.T) {
-	setup(t)
-	defer tearDown(t)
-
-	// Arrange
-	db, err := database.NewSQLite(TEST_DB_NAME)
-	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-	defer db.DB().Close()
+	db := setup(t)
+	defer tearDown(t, db)
 
 	// Act
-	err = database.MigrateUp(db, 0, "")
+	err := database.MigrateUp(db, 0, "")
 
 	// Assert
 	if err == nil {
-		t.Fatal(tests.FormatExpected("error", "nil"))
+		t.Fatalf("expected %s, received %s", "error", "nil")
 	}
 }
 
 func TestMigrateUpExisting(t *testing.T) {
-	setup(t)
-	defer tearDown(t)
+	db := setup(t)
+	defer tearDown(t, db)
 
 	// Arrange
-	db, err := database.NewSQLite(TEST_DB_NAME)
-	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-	defer db.DB().Close()
-
 	query1 := `
 CREATE TABLE migrate_test_up_existing1 (
   id INT PRIMARY KEY
 )`
 
-	err = database.MigrateUp(db, 1, query1)
+	err := database.MigrateUp(db, 1, query1)
 	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
 	}
 
 	query2 := `
@@ -108,135 +77,245 @@ CREATE TABLE migrate_test_up_existing2 (
 
 	// Assert
 	if err == nil {
-		t.Fatal(tests.FormatExpected("error", "nil"))
+		t.Fatalf("expected %s, received %s", "error", "nil")
 	}
 }
 
 func TestMigrateDown(t *testing.T) {
-	setup(t)
-	defer tearDown(t)
+	db := setup(t)
+	defer tearDown(t, db)
 
 	// Arrange
-	db, err := database.NewSQLite(TEST_DB_NAME)
-	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-	defer db.DB().Close()
-
 	upQuery := `
 CREATE TABLE migrate_test_down (
   id INT PRIMARY KEY
 )`
 
-	err = database.MigrateUp(db, 1, upQuery)
+	err := database.MigrateUp(db, 1, upQuery)
 	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
 	}
 
 	// Act
 	err = database.MigrateDown(db, 1, "DROP TABLE migrate_test_down")
 	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
 	}
 
 	// Assert
-	userVersionRow := db.DB().QueryRow("PRAGMA user_version")
-	if userVersionRow == nil {
-		t.Fatal(tests.FormatExpected("*sql.Row", "nil"))
-	}
-	userVersionBytes := make([]byte, 1)
-	err = userVersionRow.Scan(&userVersionBytes)
+	userVersion, err := db.GetCurrentVersion()
 	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-
-	userVersion, err := strconv.Atoi(string(userVersionBytes))
-	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
 	}
 
 	if userVersion != 0 {
-		t.Fatal(tests.FormatExpected("0", string(userVersionBytes)))
+		t.Fatalf("expected %s, received %d", "0", userVersion)
 	}
 
 	_, err = db.DB().Exec("INSERT INTO migrate_test_down (id) VALUES (1)")
 	if err == nil {
-		t.Fatal(tests.FormatExpected("error", "nil"))
+		t.Fatalf("expected %s, received %s", "error", "nil")
 	}
 }
 
-func TestMigrateDownPastZero(t *testing.T) {
-	setup(t)
-	defer tearDown(t)
-
-	// Arrange
-	db, err := database.NewSQLite(TEST_DB_NAME)
-	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-	defer db.DB().Close()
+func TestMigrateDownNegative(t *testing.T) {
+	db := setup(t)
+	defer tearDown(t, db)
 
 	// Act
-	err = database.MigrateDown(db, 0, "")
+	err := database.MigrateDown(db, -1, "")
 
 	// Assert
 	if err == nil {
-		t.Fatal(tests.FormatExpected("error", "nil"))
+		t.Fatalf("expected %s, received %s", "error", "nil")
 	}
 }
 
 func TestMigrateDownNonExisting(t *testing.T) {
-	setup(t)
-	defer tearDown(t)
-
-	// Arrange
-	db, err := database.NewSQLite(TEST_DB_NAME)
-	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-	defer db.DB().Close()
+	db := setup(t)
+	defer tearDown(t, db)
 
 	// Act
-	err = database.MigrateDown(db, 1, "")
+	err := database.MigrateDown(db, 1, "")
 
 	// Assert
 	if err == nil {
-		t.Fatal(tests.FormatExpected("error", "nil"))
+		t.Fatalf("expected %s, received %s", "error", "nil")
 	}
 }
 
-func TestMigrations(t *testing.T) {
+func TestApplyMigrations(t *testing.T) {
+	db := setup(t)
+	defer tearDown(t, db)
+
 	// Arrange
-	testDbConn, exists := os.LookupEnv("TEST_DB_CONN")
-	if !exists {
-		t.Fatal(tests.FormatExpected("true", "false"))
+	up := []string{
+		"CREATE TABLE apply_migrations1 (id TEXT)",
+		"CREATE TABLE apply_migrations2 (id TEXT)",
+		"CREATE TABLE apply_migrations3 (id TEXT)",
 	}
 
-	db, err := database.NewPostgres(testDbConn)
+	down := []string{
+		"DROP TABLE apply_migrations1",
+		"DROP TABLE apply_migrations2",
+		"DROP TABLE apply_migrations3",
+	}
+
+	// Act
+	err := database.ApplyMigrations(db, up, down)
+
+	// Assert
 	if err != nil {
-		t.Fatal(tests.FormatExpected("nil", err.Error()))
-	}
-	defer db.DB().Close()
-
-	forwards := database.ForwardMigrations()
-	for i := 0; i < len(forwards); i += 1 {
-		// Act
-		err = database.MigrateUp(db, i+1, forwards[i])
-
-		// Assert
-		if err != nil {
-			t.Fatal(tests.FormatExpected("nil", err.Error()))
-		}
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
 	}
 
-	backwards := database.BackwardMigrations()
-	for i := len(backwards) - 1; i >= 0; i -= 1 {
-		// Act
-		err = database.MigrateDown(db, i+1, backwards[i])
+	userVersion, err := db.GetCurrentVersion()
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
 
-		// Assert
-		if err != nil {
-			t.Fatal(tests.FormatExpected("nil", err.Error()))
-		}
+	if userVersion != 3 {
+		t.Fatalf("expected %d, received %d", 3, userVersion)
+	}
+
+	_, err = db.DB().Exec("INSERT INTO apply_migrations3 (id) VALUES ('SOME_ID')")
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+}
+
+func TestApplySpecificMigration(t *testing.T) {
+	db := setup(t)
+	defer tearDown(t, db)
+
+	// Arrange
+	up := []string{
+		"CREATE TABLE apply_migrations1 (id TEXT)",
+		"CREATE TABLE apply_migrations2 (id TEXT)",
+		"CREATE TABLE apply_migrations3 (id TEXT)",
+	}
+
+	down := []string{
+		"DROP TABLE apply_migrations1",
+		"DROP TABLE apply_migrations2",
+		"DROP TABLE apply_migrations3",
+	}
+
+	// Act
+	err := database.ApplyMigrations(db, up, down, 2)
+
+	// Assert
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	userVersion, err := db.GetCurrentVersion()
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	if userVersion != 2 {
+		t.Fatalf("expected %d, received %d", 2, userVersion)
+	}
+
+	_, err = db.DB().Exec("INSERT INTO apply_migrations2 (id) VALUES ('SOME_ID')")
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	_, err = db.DB().Exec("INSERT INTO apply_migrations3 (id) VALUES ('SOME_ID')")
+	if err == nil {
+		t.Fatalf("expected %s, received %s", "error", "nil")
+	}
+}
+
+func TestApplyMigrationsDown(t *testing.T) {
+	db := setup(t)
+	defer tearDown(t, db)
+
+	// Arrange
+	up := []string{
+		"CREATE TABLE apply_migrations1 (id TEXT)",
+		"CREATE TABLE apply_migrations2 (id TEXT)",
+		"CREATE TABLE apply_migrations3 (id TEXT)",
+	}
+
+	down := []string{
+		"DROP TABLE apply_migrations1",
+		"DROP TABLE apply_migrations2",
+		"DROP TABLE apply_migrations3",
+	}
+
+	err := database.ApplyMigrations(db, up, down)
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	// Act
+	err = database.ApplyMigrations(db, up, down, 1)
+
+	// Assert
+	userVersion, err := db.GetCurrentVersion()
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	if userVersion != 1 {
+		t.Fatalf("expected %d, received %d", 1, userVersion)
+	}
+
+	_, err = db.DB().Exec("INSERT INTO apply_migrations1 (id) VALUES ('SOME_ID')")
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	_, err = db.DB().Exec("INSERT INTO apply_migrations2 (id) VALUES ('SOME_ID')")
+	if err == nil {
+		t.Fatalf("expected %s, received %s", "error", "nil")
+	}
+}
+
+func TestApplyMigrationsDownAll(t *testing.T) {
+	db := setup(t)
+	defer tearDown(t, db)
+
+	// Arrange
+	up := []string{
+		"CREATE TABLE apply_migrations1 (id TEXT)",
+		"CREATE TABLE apply_migrations2 (id TEXT)",
+		"CREATE TABLE apply_migrations3 (id TEXT)",
+	}
+
+	down := []string{
+		"DROP TABLE apply_migrations1",
+		"DROP TABLE apply_migrations2",
+		"DROP TABLE apply_migrations3",
+	}
+
+	err := database.ApplyMigrations(db, up, down)
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	// Act
+	err = database.ApplyMigrations(db, up, down, 0)
+
+	// Assert
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	userVersion, err := db.GetCurrentVersion()
+	if err != nil {
+		t.Fatalf("expected %s, received %s", "nil", err.Error())
+	}
+
+	if userVersion != 0 {
+		t.Fatalf("expected %d, received %d", 0, userVersion)
+	}
+
+	_, err = db.DB().Exec("INSERT INTO apply_migrations1 (id) VALUES ('SOME_ID')")
+	if err == nil {
+		t.Fatalf("expected %s, received %s", "error", "nil")
 	}
 }

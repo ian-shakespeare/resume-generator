@@ -31,7 +31,7 @@ func (s *SQLiteDatabase) DB() *sql.DB {
 	return s.db
 }
 
-func (s *SQLiteDatabase) getCurrentVersion() (int, error) {
+func (s *SQLiteDatabase) GetCurrentVersion() (int, error) {
 	currentVersionRow := s.db.QueryRow("PRAGMA user_version")
 	if currentVersionRow == nil {
 		return 0, errors.New("missing user_version row")
@@ -50,7 +50,7 @@ func (s *SQLiteDatabase) getCurrentVersion() (int, error) {
 	return currentVersion, nil
 }
 
-func (s *SQLiteDatabase) setVersion(version int) error {
+func (s *SQLiteDatabase) SetVersion(version int) error {
 	pragmaQuery := fmt.Sprintf("PRAGMA user_version = %d", version)
 	_, err := s.db.Exec(pragmaQuery)
 	return err

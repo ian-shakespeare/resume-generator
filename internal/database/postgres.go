@@ -26,8 +26,8 @@ func NewPostgres(conn string) (*PostgresDatabase, error) {
 
 	p := &PostgresDatabase{db}
 
-	if _, err = p.getCurrentVersion(); err != nil {
-		p.setVersion(0)
+	if _, err = p.GetCurrentVersion(); err != nil {
+		p.SetVersion(0)
 	}
 
 	return p, nil
@@ -37,7 +37,7 @@ func (p *PostgresDatabase) DB() *sql.DB {
 	return p.db
 }
 
-func (p *PostgresDatabase) getCurrentVersion() (int, error) {
+func (p *PostgresDatabase) GetCurrentVersion() (int, error) {
 	currentVersionRow := p.db.QueryRow("SELECT current_setting('my.version') AS verion")
 	if currentVersionRow == nil {
 		return 0, errors.New("missing user_version row")
@@ -56,7 +56,7 @@ func (p *PostgresDatabase) getCurrentVersion() (int, error) {
 	return currentVersion, nil
 }
 
-func (p *PostgresDatabase) setVersion(version int) error {
+func (p *PostgresDatabase) SetVersion(version int) error {
 	pragmaQuery := fmt.Sprintf("SET my.version TO %d", version)
 	_, err := p.db.Exec(pragmaQuery)
 	return err
