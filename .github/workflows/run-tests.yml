@@ -1,0 +1,14 @@
+name: Run Tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v5
+      - name: Install Dependencies
+        run: go get .
+      - name: Run Tests
+        run: make test
