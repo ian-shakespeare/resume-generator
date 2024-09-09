@@ -1,5 +1,6 @@
 BIN := resume-generator
 CMD_DIR := cmd/resumegenerator/
+TESTS_DIR := ./tests/...
 
 all: run
 
@@ -10,8 +11,11 @@ build:
 	go build -C $(CMD_DIR) -o $(BIN)
 	mv $(CMD_DIR)$(BIN) ./
 
+test:
+	go test $(TESTS_DIR)
+
 clean:
 	go clean
 	rm -f $(BIN)
 
-.PHONY: all build run clean
+.PHONY: all build run clean test
