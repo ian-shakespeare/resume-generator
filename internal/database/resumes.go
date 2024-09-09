@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -77,7 +76,7 @@ INSERT INTO resumes (
 	if err != nil {
 		return Resume{}, err
 	} else if rowsAffected != 1 {
-		return Resume{}, errors.New(fmt.Sprintf("affected an unexpected number of rows (%d)", rowsAffected))
+		return Resume{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
 	return Resume{
@@ -139,7 +138,7 @@ func rowToResume(row *sql.Row) (Resume, error) {
 		&resume.Name,
 		&resume.Email,
 		&resume.PhoneNumber,
-    &resume.Prelude,
+		&resume.Prelude,
 		&resume.Location,
 		&resume.LinkedIn,
 		&resume.Github,

@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -93,7 +92,7 @@ INSERT INTO educations (
 	if err != nil {
 		return Education{}, err
 	} else if rowsAffected != 1 {
-		return Education{}, errors.New(fmt.Sprintf("affected an unexpected number of rows (%d)", rowsAffected))
+		return Education{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
 	return Education{

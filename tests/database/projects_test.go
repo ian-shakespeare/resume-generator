@@ -2,12 +2,13 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
+	"resumegenerator/tests"
 	"testing"
 )
 
 func TestCreateProject(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 	if err != nil {
@@ -35,7 +36,7 @@ func TestCreateProject(t *testing.T) {
 		nil,
 	)
 
-	_, err = database.CreateProject(db, &resume, "name", "role")
+	_, err = database.CreateProject(db, &resume, "name", "description", "role")
 
 	if err != nil {
 		t.Fatalf("expected %s, received %s", "nil", err.Error())
@@ -43,8 +44,8 @@ func TestCreateProject(t *testing.T) {
 }
 
 func TestGetProject(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 	if err != nil {
@@ -72,7 +73,7 @@ func TestGetProject(t *testing.T) {
 		nil,
 	)
 
-	created, err := database.CreateProject(db, &resume, "name", "role")
+	created, err := database.CreateProject(db, &resume, "name", "description", "role")
 
 	if err != nil {
 		t.Fatalf("expected %s, received %s", "nil", err.Error())
@@ -86,8 +87,8 @@ func TestGetProject(t *testing.T) {
 }
 
 func TestProjectResposibility(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 	if err != nil {
@@ -115,7 +116,7 @@ func TestProjectResposibility(t *testing.T) {
 		nil,
 	)
 
-	project, err := database.CreateProject(db, &resume, "name", "role")
+	project, err := database.CreateProject(db, &resume, "name", "description", "role")
 	if err != nil {
 		t.Fatalf("expected %s, received %s", "project", "nil")
 	}

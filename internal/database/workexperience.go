@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -73,7 +72,7 @@ INSERT INTO work_experiences (
 	if err != nil {
 		return WorkExperience{}, err
 	} else if rowsAffected != 1 {
-		return WorkExperience{}, errors.New(fmt.Sprintf("affected an unexpected number of rows (%d)", rowsAffected))
+		return WorkExperience{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
 	responsibilities := make([]WorkResponsibility, 0)
@@ -170,7 +169,7 @@ INSERT INTO work_responsibilities (
 	if err != nil {
 		return WorkResponsibility{}, err
 	} else if rowsAffected != 1 {
-		return WorkResponsibility{}, errors.New(fmt.Sprintf("affected an unexpected number of rows (%d)", rowsAffected))
+		return WorkResponsibility{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
 	r := WorkResponsibility{

@@ -2,14 +2,15 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
+	"resumegenerator/tests"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestMigrateUp(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	query := `
@@ -40,8 +41,8 @@ CREATE TABLE migrate_test_up (
 }
 
 func TestMigrateUpToZero(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Act
 	err := database.MigrateUp(db, 0, "")
@@ -53,8 +54,8 @@ func TestMigrateUpToZero(t *testing.T) {
 }
 
 func TestMigrateUpExisting(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	query1 := `
@@ -82,8 +83,8 @@ CREATE TABLE migrate_test_up_existing2 (
 }
 
 func TestMigrateDown(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	upQuery := `
@@ -119,8 +120,8 @@ CREATE TABLE migrate_test_down (
 }
 
 func TestMigrateDownNegative(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Act
 	err := database.MigrateDown(db, -1, "")
@@ -132,8 +133,8 @@ func TestMigrateDownNegative(t *testing.T) {
 }
 
 func TestMigrateDownNonExisting(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Act
 	err := database.MigrateDown(db, 1, "")
@@ -145,8 +146,8 @@ func TestMigrateDownNonExisting(t *testing.T) {
 }
 
 func TestApplyMigrations(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	up := []string{
@@ -185,8 +186,8 @@ func TestApplyMigrations(t *testing.T) {
 }
 
 func TestApplySpecificMigration(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	up := []string{
@@ -230,8 +231,8 @@ func TestApplySpecificMigration(t *testing.T) {
 }
 
 func TestApplyMigrationsDown(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	up := []string{
@@ -276,8 +277,8 @@ func TestApplyMigrationsDown(t *testing.T) {
 }
 
 func TestApplyMigrationsDownAll(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	up := []string{

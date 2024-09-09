@@ -1,4 +1,4 @@
-package database_test
+package tests
 
 import (
 	"os"
@@ -8,7 +8,7 @@ import (
 
 const TEST_DB_NAME string = "testing.db"
 
-func setup(t *testing.T) database.VersionedDatabase {
+func SetupDB(t *testing.T) database.VersionedDatabase {
 	file, err := os.Create(TEST_DB_NAME)
 	if err != nil {
 		t.Fatalf("setup %s", err.Error())
@@ -23,7 +23,7 @@ func setup(t *testing.T) database.VersionedDatabase {
 	return db
 }
 
-func tearDown(t *testing.T, db database.VersionedDatabase) {
+func TearDownDB(t *testing.T, db database.VersionedDatabase) {
 	db.DB().Close()
 	err := os.Remove(TEST_DB_NAME)
 	if err != nil {

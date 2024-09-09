@@ -2,13 +2,14 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
+	"resumegenerator/tests"
 	"testing"
 	"time"
 )
 
 func TestCreateWorkExperience(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 	if err != nil {
@@ -44,8 +45,8 @@ func TestCreateWorkExperience(t *testing.T) {
 }
 
 func TestCreateWorkExperienceNoNil(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 	if err != nil {
@@ -83,8 +84,8 @@ func TestCreateWorkExperienceNoNil(t *testing.T) {
 }
 
 func TestGetWorkExperience(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 	if err != nil {
@@ -126,8 +127,8 @@ func TestGetWorkExperience(t *testing.T) {
 }
 
 func TestGetWorkExperienceNoNil(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 	if err != nil {
@@ -174,8 +175,8 @@ func TestGetWorkExperienceNoNil(t *testing.T) {
 }
 
 func TestCreateWorkResposibility(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 	if err != nil {

@@ -2,13 +2,14 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
+	"resumegenerator/tests"
 	"testing"
 	"time"
 )
 
 func TestCreateEducation(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
@@ -27,7 +28,7 @@ func TestCreateEducation(t *testing.T) {
 		"John Doe",
 		"jdoe@email.com",
 		"+1 (000) 000-0000",
-    "prelude",
+		"prelude",
 		nil,
 		nil,
 		nil,
@@ -58,8 +59,8 @@ func TestCreateEducation(t *testing.T) {
 }
 
 func TestCreateEducationNoNil(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
@@ -77,7 +78,7 @@ func TestCreateEducationNoNil(t *testing.T) {
 		"John Doe",
 		"jdoe@email.com",
 		"+1 (000) 000-0000",
-    "prelude",
+		"prelude",
 		nil,
 		nil,
 		nil,
@@ -112,8 +113,8 @@ func TestCreateEducationNoNil(t *testing.T) {
 }
 
 func TestGetEducation(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
@@ -132,7 +133,7 @@ func TestGetEducation(t *testing.T) {
 		"John Doe",
 		"jdoe@email.com",
 		"+1 (000) 000-0000",
-    "prelude",
+		"prelude",
 		nil,
 		nil,
 		nil,
@@ -172,8 +173,8 @@ func TestGetEducation(t *testing.T) {
 }
 
 func TestGetEducationNoNil(t *testing.T) {
-	db := setup(t)
-	defer tearDown(t, db)
+	db := tests.SetupDB(t)
+	defer tests.TearDownDB(t, db)
 
 	// Arrange
 	err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
@@ -192,7 +193,7 @@ func TestGetEducationNoNil(t *testing.T) {
 		"John Doe",
 		"jdoe@email.com",
 		"+1 (000) 000-0000",
-    "prelude",
+		"prelude",
 		nil,
 		nil,
 		nil,
