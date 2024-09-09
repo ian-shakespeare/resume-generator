@@ -3,17 +3,18 @@ package database
 func UpMigrations() []string {
 	return []string{
 		`
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
   user_id VARCHAR(36) PRIMARY KEY,
   created_at INTEGER NOT NULL --> TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS resumes (
+CREATE TABLE resumes (
   resume_id VARCHAR(36) PRIMARY KEY,
   user_id VARCHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   phone_number VARCHAR(255) NOT NULL,
+  prelude TEXT NOT NULL,
   created_at INTEGER NOT NULL, --> TIMESTAMP
 
   location VARCHAR(255),
@@ -30,7 +31,7 @@ CREATE TABLE IF NOT EXISTS resumes (
       ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS educations (
+CREATE TABLE educations (
   education_id VARCHAR(36) PRIMARY KEY,
   resume_id VARCHAR(36) NOT NULL,
   degree_type VARCHAR(255) NOT NULL,
@@ -50,7 +51,7 @@ CREATE TABLE IF NOT EXISTS educations (
       ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS work_experiences (
+CREATE TABLE work_experiences (
   work_experience_id VARCHAR(36) PRIMARY KEY,
   resume_id VARCHAR(36) NOT NULL,
   employer VARCHAR(255) NOT NULL,
@@ -68,7 +69,7 @@ CREATE TABLE IF NOT EXISTS work_experiences (
       ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS work_responsibilities (
+CREATE TABLE work_responsibilities (
   work_responsibility_id VARCHAR(36) PRIMARY KEY,
   work_experience_id VARCHAR(36) NOT NULL,
   responsibility VARCHAR(255) NOT NULL,
@@ -80,7 +81,7 @@ CREATE TABLE IF NOT EXISTS work_responsibilities (
       ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS projects (
+CREATE TABLE projects (
   project_id VARCHAR(36) PRIMARY KEY,
   resume_id VARCHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -93,7 +94,7 @@ CREATE TABLE IF NOT EXISTS projects (
       ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS project_responsibilities (
+CREATE TABLE project_responsibilities (
   project_responsibility_id VARCHAR(36) PRIMARY KEY,
   project_id VARCHAR(36) NOT NULL,
   responsibility VARCHAR(255) NOT NULL,
@@ -111,13 +112,13 @@ CREATE TABLE IF NOT EXISTS project_responsibilities (
 func DownMigrations() []string {
 	return []string{
 		`
-DROP TABLE IF EXISTS project_responsibilities;
-DROP TABLE IF EXISTS projects;
-DROP TABLE IF EXISTS work_responsibilities;
-DROP TABLE IF EXISTS work_experiences;
-DROP TABLE IF EXISTS educations;
-DROP TABLE IF EXISTS resumes;
-DROP TABLE IF EXISTS users;
+DROP TABLE project_responsibilities;
+DROP TABLE projects;
+DROP TABLE work_responsibilities;
+DROP TABLE work_experiences;
+DROP TABLE educations;
+DROP TABLE resumes;
+DROP TABLE users;
     `,
 	}
 }

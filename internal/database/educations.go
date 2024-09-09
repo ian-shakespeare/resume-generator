@@ -23,63 +23,6 @@ type Education struct {
 	GPA          *string    `json:"gpa"`
 }
 
-func educationFromRow(row *sql.Row) (Education, error) {
-	var education struct {
-		Id           string
-		ResumeId     string
-		DegreeType   string
-		FieldOfStudy string
-		Institution  string
-		Began        int64
-		Current      int
-		CreatedAt    int64
-		Location     *string
-		Finished     *int64
-		GPA          *string
-	}
-	if err := row.Scan(
-		&education.Id,
-		&education.ResumeId,
-		&education.DegreeType,
-		&education.FieldOfStudy,
-		&education.Institution,
-		&education.Began,
-		&education.Current,
-		&education.CreatedAt,
-		&education.Location,
-		&education.Finished,
-		&education.GPA,
-	); err != nil {
-		return Education{}, nil
-	}
-
-	began := time.Unix(education.Began, 0)
-	current := false
-	if education.Current != 0 {
-		current = true
-	}
-	createdAt := time.Unix(education.CreatedAt, 0)
-	var finished *time.Time
-	if education.Finished != nil {
-		val := time.Unix(*education.Finished, 0)
-		finished = &val
-	}
-
-	return Education{
-		Id:           education.Id,
-		ResumeId:     education.ResumeId,
-		DegreeType:   education.DegreeType,
-		FieldOfStudy: education.FieldOfStudy,
-		Institution:  education.Institution,
-		Began:        began,
-		Current:      current,
-		CreatedAt:    createdAt,
-		Location:     education.Location,
-		Finished:     finished,
-		GPA:          education.GPA,
-	}, nil
-}
-
 func CreateEducation(
 	db VersionedDatabase,
 	resume *Resume,
@@ -191,10 +134,67 @@ WHERE education_id = ?
 		return nil
 	}
 
-	education, err := educationFromRow(row)
+	education, err := rowToEducation(row)
 	if err != nil {
 		return nil
 	}
 
 	return &education
+}
+
+func rowToEducation(row *sql.Row) (Education, error) {
+	var education struct {
+		Id           string
+		ResumeId     string
+		DegreeType   string
+		FieldOfStudy string
+		Institution  string
+		Began        int64
+		Current      int
+		CreatedAt    int64
+		Location     *string
+		Finished     *int64
+		GPA          *string
+	}
+	if err := row.Scan(
+		&education.Id,
+		&education.ResumeId,
+		&education.DegreeType,
+		&education.FieldOfStudy,
+		&education.Institution,
+		&education.Began,
+		&education.Current,
+		&education.CreatedAt,
+		&education.Location,
+		&education.Finished,
+		&education.GPA,
+	); err != nil {
+		return Education{}, nil
+	}
+
+	began := time.Unix(education.Began, 0)
+	current := false
+	if education.Current != 0 {
+		current = true
+	}
+	createdAt := time.Unix(education.CreatedAt, 0)
+	var finished *time.Time
+	if education.Finished != nil {
+		val := time.Unix(*education.Finished, 0)
+		finished = &val
+	}
+
+	return Education{
+		Id:           education.Id,
+		ResumeId:     education.ResumeId,
+		DegreeType:   education.DegreeType,
+		FieldOfStudy: education.FieldOfStudy,
+		Institution:  education.Institution,
+		Began:        began,
+		Current:      current,
+		CreatedAt:    createdAt,
+		Location:     education.Location,
+		Finished:     finished,
+		GPA:          education.GPA,
+	}, nil
 }

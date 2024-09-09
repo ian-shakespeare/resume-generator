@@ -14,21 +14,6 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-func userFromRow(row *sql.Row) (User, error) {
-	var user struct {
-		Id        string
-		CreatedAt int64
-	}
-	if err := row.Scan(&user.Id, &user.CreatedAt); err != nil {
-		return User{}, err
-	}
-
-	return User{
-		Id:        user.Id,
-		CreatedAt: time.Unix(user.CreatedAt, 0),
-	}, nil
-}
-
 func CreateUser(db VersionedDatabase) (User, error) {
 	id := uuid.New().String()
 	createdAt := time.Now()
@@ -66,10 +51,25 @@ WHERE user_id = ?
 		return nil
 	}
 
-	user, err := userFromRow(row)
+	user, err := rowToUser(row)
 	if err != nil {
 		return nil
 	}
 
 	return &user
+}
+
+func rowToUser(row *sql.Row) (User, error) {
+	var user struct {
+		Id        string
+		CreatedAt int64
+	}
+	if err := row.Scan(&user.Id, &user.CreatedAt); err != nil {
+		return User{}, err
+	}
+
+	return User{
+		Id:        user.Id,
+		CreatedAt: time.Unix(user.CreatedAt, 0),
+	}, nil
 }

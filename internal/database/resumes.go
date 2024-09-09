@@ -15,6 +15,7 @@ type Resume struct {
 	Name        string    `json:"name"`
 	Email       string    `json:"email"`
 	PhoneNumber string    `json:"phoneNumber"`
+	Prelude     string    `json:"prelude"`
 	CreatedAt   time.Time `json:"createdAt"`
 	Location    *string   `json:"location"`
 	LinkedIn    *string   `json:"linkedIn"`
@@ -25,34 +26,13 @@ type Resume struct {
 	Portfolio   *string   `json:"portfolio"`
 }
 
-func resumeFromRow(row *sql.Row) (Resume, error) {
-	var resume Resume
-	if err := row.Scan(
-		&resume.Id,
-		&resume.UserId,
-		&resume.Name,
-		&resume.Email,
-		&resume.PhoneNumber,
-		&resume.Location,
-		&resume.LinkedIn,
-		&resume.Github,
-		&resume.Facebook,
-		&resume.Instagram,
-		&resume.Twitter,
-		&resume.Portfolio,
-	); err != nil {
-		return Resume{}, nil
-	}
-
-	return resume, nil
-}
-
 func CreateResume(
 	db VersionedDatabase,
 	user *User,
 	name string,
 	email string,
 	phoneNumber string,
+	prelude string,
 	location *string,
 	linkedIn *string,
 	github *string,
@@ -71,6 +51,7 @@ INSERT INTO resumes (
   name,
   email,
   phone_number,
+  prelude,
   location,
   linkedin_username,
   github_username,
@@ -84,11 +65,11 @@ INSERT INTO resumes (
   ?, ?, ?,
   ?, ?, ?,
   ?, ?, ?,
-  ?
+  ?, ?
 )
   `
 
-	result, err := db.DB().Exec(query, id, user.Id, name, email, phoneNumber, location, linkedIn, github, facebook, instagram, twitter, portfolio, createdAt.Unix())
+	result, err := db.DB().Exec(query, id, user.Id, name, email, phoneNumber, prelude, location, linkedIn, github, facebook, instagram, twitter, portfolio, createdAt.Unix())
 	if err != nil {
 		return Resume{}, err
 	}
@@ -105,6 +86,7 @@ INSERT INTO resumes (
 		Name:        name,
 		Email:       email,
 		PhoneNumber: phoneNumber,
+		Prelude:     prelude,
 		Location:    location,
 		LinkedIn:    linkedIn,
 		Github:      github,
@@ -124,6 +106,7 @@ SELECT
   name,
   email,
   phone_number,
+  prelude,
   location,
   linkedin_username,
   github_username,
@@ -140,10 +123,33 @@ WHERE resume_id = ?
 		return nil
 	}
 
-	resume, err := resumeFromRow(row)
+	resume, err := rowToResume(row)
 	if err != nil {
 		return nil
 	}
 
 	return &resume
+}
+
+func rowToResume(row *sql.Row) (Resume, error) {
+	var resume Resume
+	if err := row.Scan(
+		&resume.Id,
+		&resume.UserId,
+		&resume.Name,
+		&resume.Email,
+		&resume.PhoneNumber,
+    &resume.Prelude,
+		&resume.Location,
+		&resume.LinkedIn,
+		&resume.Github,
+		&resume.Facebook,
+		&resume.Instagram,
+		&resume.Twitter,
+		&resume.Portfolio,
+	); err != nil {
+		return Resume{}, nil
+	}
+
+	return resume, nil
 }
