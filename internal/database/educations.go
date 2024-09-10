@@ -168,7 +168,7 @@ func rowToEducation(row *sql.Row) (Education, error) {
 		&education.Finished,
 		&education.GPA,
 	); err != nil {
-		return Education{}, nil
+		return Education{}, err
 	}
 
 	began := time.Unix(education.Began, 0)
@@ -196,4 +196,66 @@ func rowToEducation(row *sql.Row) (Education, error) {
 		Finished:     finished,
 		GPA:          education.GPA,
 	}, nil
+}
+
+func rowsToEducation(rows *sql.Rows) ([]Education, error) {
+	educations := make([]Education, 0)
+
+	for rows.Next() {
+		var education struct {
+			Id           string
+			ResumeId     string
+			DegreeType   string
+			FieldOfStudy string
+			Institution  string
+			Began        int64
+			Current      int
+			CreatedAt    int64
+			Location     *string
+			Finished     *int64
+			GPA          *string
+		}
+		if err := rows.Scan(
+			&education.Id,
+			&education.ResumeId,
+			&education.DegreeType,
+			&education.FieldOfStudy,
+			&education.Institution,
+			&education.Began,
+			&education.Current,
+			&education.CreatedAt,
+			&education.Location,
+			&education.Finished,
+			&education.GPA,
+		); err != nil {
+			return nil, err
+		}
+
+		began := time.Unix(education.Began, 0)
+		current := false
+		if education.Current != 0 {
+			current = true
+		}
+		createdAt := time.Unix(education.CreatedAt, 0)
+		var finished *time.Time
+		if education.Finished != nil {
+			val := time.Unix(*education.Finished, 0)
+			finished = &val
+		}
+		educations = append(educations, Education{
+			Id:           education.Id,
+			ResumeId:     education.ResumeId,
+			DegreeType:   education.DegreeType,
+			FieldOfStudy: education.FieldOfStudy,
+			Institution:  education.Institution,
+			Began:        began,
+			Current:      current,
+			CreatedAt:    createdAt,
+			Location:     education.Location,
+			Finished:     finished,
+			GPA:          education.GPA,
+		})
+	}
+
+	return educations, nil
 }

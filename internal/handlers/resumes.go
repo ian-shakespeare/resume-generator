@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
+	"sync"
 )
 
 type NewResume struct {
@@ -74,25 +75,25 @@ func HandleCreateResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db
 		newResume.Portfolio,
 	)
 	if err != nil {
-		// TODO: Should maybe be a different error.
-		http.Error(w, "bad request", 400)
+		internalErr, _ := newInternalError(err, "cannot create resume")
+		w.Write(internalErr)
+		w.WriteHeader(500)
+		w.Header().Add("content-type", "application/json")
 		return
 	}
 
 	response, err := json.Marshal(resume)
 	if err != nil {
-		// TODO: Should maybe be a different error.
-		http.Error(w, "bad request", 400)
+		internalErr, _ := newInternalError(err, "cannot send resume")
+		w.Write(internalErr)
+		w.WriteHeader(500)
+		w.Header().Add("content-type", "application/json")
 		return
 	}
 
-	_, err = w.Write(response)
-	if err != nil {
-		// TODO: Should maybe be a different error.
-		http.Error(w, "bad request", 400)
-		return
-	}
+	w.Write(response)
 	w.WriteHeader(201)
+	w.Header().Add("content-type", "application/json")
 }
 
 type FullResume struct {
@@ -137,4 +138,65 @@ func HandleGetResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db da
 		http.Error(w, "unauthorized", 401)
 		return
 	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+
+	var educations []database.Education
+	var workExperiences []database.WorkExperience
+	var projects []database.Project
+	var dbErr error
+
+	go func() {
+		defer wg.Done()
+		educations, err = resume.Educations(db)
+		if err != nil && dbErr == nil {
+			dbErr = err
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		workExperiences, err = resume.WorkExperiences(db)
+		if err != nil && dbErr == nil {
+			dbErr = err
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		projects, err = resume.Projects(db)
+		if err != nil && dbErr == nil {
+			dbErr = err
+		}
+	}()
+
+	wg.Wait()
+
+	if dbErr != nil {
+		internalErr, _ := newInternalError(err, "cannot get full resume")
+		w.Write(internalErr)
+		w.WriteHeader(500)
+		w.Header().Add("content-type", "application/json")
+		return
+	}
+
+	fullResume := FullResume{
+		Resume:         *resume,
+		Education:      educations,
+		WorkExperience: workExperiences,
+		Projects:       projects,
+	}
+
+	response, err := json.Marshal(fullResume)
+	if err != nil {
+		internalErr, _ := newInternalError(err, "cannot send resume")
+		w.Write(internalErr)
+		w.WriteHeader(500)
+		w.Header().Add("content-type", "application/json")
+		return
+	}
+
+	w.Write(response)
+	w.Header().Add("content-type", "application/json")
 }

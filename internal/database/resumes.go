@@ -130,6 +130,89 @@ WHERE resume_id = ?
 	return &resume
 }
 
+func (r *Resume) Educations(db VersionedDatabase) ([]Education, error) {
+	query := `
+SELECT
+  education_id,
+  resume_id,
+  degree_type,
+  field_of_study,
+  institution,
+  began,
+  current,
+  created_at,
+  location,
+  finished,
+  gpa
+FROM educations
+WHERE resume_id = ?
+  `
+
+	rows, err := db.DB().Query(query, r.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	educations, err := rowsToEducation(rows)
+
+	return educations, err
+}
+
+func (r *Resume) WorkExperiences(db VersionedDatabase) ([]WorkExperience, error) {
+	query := `
+SELECT
+  we.work_experience_id,
+  we.resume_id,
+  we.employer,
+  we.title,
+  we.began,
+  we.current,
+  we.created_at,
+  we.location,
+  we.finished,
+  wr.work_responsibility_id,
+  wr.responsibility,
+  wr.created_at AS responsibility_created_at
+FROM work_experiences AS we
+LEFT JOIN work_responsibilities AS wr ON (we.work_experience_id = wr.work_experience_id)
+WHERE we.resume_id = ?
+  `
+
+	rows, err := db.DB().Query(query, r.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	workExperiences, err := rowsToWorkExperience(rows)
+	return workExperiences, err
+}
+
+func (r *Resume) Projects(db VersionedDatabase) ([]Project, error) {
+	query := `
+SELECT
+  p.project_id,
+  p.resume_id,
+  p.name,
+  p.description,
+  p.role,
+  p.created_at,
+  r.project_responsibility_id,
+  r.responsibility,
+  r.created_at AS responsibility_created_at
+FROM projects AS p
+LEFT JOIN project_responsibilities AS r ON (p.project_id = r.project_id)
+WHERE p.resume_id = ?
+  `
+
+	rows, err := db.DB().Query(query, r.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	projects, err := rowsToProject(rows)
+	return projects, err
+}
+
 func rowToResume(row *sql.Row) (Resume, error) {
 	var resume Resume
 	if err := row.Scan(

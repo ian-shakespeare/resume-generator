@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"resumegenerator/internal/utils"
 	"time"
 
 	"github.com/google/uuid"
@@ -94,29 +95,12 @@ WHERE p.project_id = ?
 		return nil
 	}
 
-	var project *Project
-	responsibilities := make([]ProjectResponsibility, 0)
-
-	for rows.Next() {
-		p, r, err := rowsToProject(rows)
-		if err != nil {
-			return nil
-		}
-
-		if project == nil {
-			project = &p
-		}
-
-		if r != nil {
-			responsibilities = append(responsibilities, *r)
-		}
+	projects, err := rowsToProject(rows)
+	if err != nil || len(projects) != 1 {
+		return nil
 	}
 
-	if project != nil {
-		project.Responsibilities = responsibilities
-	}
-
-	return project
+	return &projects[0]
 }
 
 func CreateProjectResponsibility(
@@ -162,56 +146,66 @@ INSERT INTO project_responsibilities (
 	return r, nil
 }
 
-func rowsToProject(rows *sql.Rows) (Project, *ProjectResponsibility, error) {
-	var p struct {
-		Id          string
-		ResumeId    string
-		Name        string
-		Description string
-		Role        string
-		CreatedAt   int64
+func rowsToProject(rows *sql.Rows) ([]Project, error) {
+	projects := make([]Project, 0)
+
+	for rows.Next() {
+		var p struct {
+			Id          string
+			ResumeId    string
+			Name        string
+			Description string
+			Role        string
+			CreatedAt   int64
+		}
+
+		var r struct {
+			Id             *string
+			Responsibility *string
+			CreatedAt      *int64
+		}
+
+		if err := rows.Scan(
+			&p.Id,
+			&p.ResumeId,
+			&p.Name,
+			&p.Description,
+			&p.Role,
+			&p.CreatedAt,
+			&r.Id,
+			&r.Responsibility,
+			&r.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		existingIndex := utils.Find(projects, func(pr Project) bool {
+			return p.Id == pr.Id
+		})
+
+		if existingIndex == -1 {
+			project := Project{
+				Id:          p.Id,
+				ResumeId:    p.ResumeId,
+				Name:        p.Name,
+				Description: p.Description,
+				Role:        p.Role,
+				CreatedAt:   time.Unix(p.CreatedAt, 0),
+			}
+			projects = append(projects, project)
+			existingIndex = len(projects) - 1
+		}
+
+		if r.Id != nil {
+			createdAt := time.Unix(*r.CreatedAt, 0)
+			responsibility := ProjectResponsibility{
+				Id:             *r.Id,
+				Responsibility: *r.Responsibility,
+				CreatedAt:      createdAt,
+			}
+			projects[existingIndex].Responsibilities = append(projects[existingIndex].Responsibilities, responsibility)
+		}
 	}
 
-	var r struct {
-		Id             *string
-		Responsibility *string
-		CreatedAt      *int64
-	}
-
-	if err := rows.Scan(
-		&p.Id,
-		&p.ResumeId,
-		&p.Name,
-		&p.Description,
-		&p.Role,
-		&p.CreatedAt,
-		&r.Id,
-		&r.Responsibility,
-		&r.CreatedAt,
-	); err != nil {
-		return Project{}, nil, err
-	}
-
-	project := Project{
-		Id:          p.Id,
-		ResumeId:    p.ResumeId,
-		Name:        p.Name,
-		Description: p.Description,
-		Role:        p.Role,
-		CreatedAt:   time.Unix(p.CreatedAt, 0),
-	}
-
-	if r.Id == nil {
-		return project, nil, nil
-	}
-
-	createdAt := time.Unix(*r.CreatedAt, 0)
-
-	responsibility := ProjectResponsibility{
-		Id:             *r.Id,
-		Responsibility: *r.Responsibility,
-		CreatedAt:      createdAt,
-	}
-
-	return project, &responsibility, nil
+	return projects, nil
 }

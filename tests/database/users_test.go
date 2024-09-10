@@ -7,38 +7,36 @@ import (
 )
 
 func TestCreateUser(t *testing.T) {
-	db := tests.SetupDB(t)
-	defer tests.TearDownDB(t, db)
+	t.Run("allFields", func(t *testing.T) {
+		db := tests.SetupDB(t)
+		defer tests.TearDownDB(t, db)
 
-	// Arrange
-	database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations(), 1)
+		database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations(), 1)
 
-	// Act
-	_, err := database.CreateUser(db)
+		_, err := database.CreateUser(db)
 
-	// Assert
-	if err != nil {
-		t.Fatalf("expected %s, received %s", "nil", err.Error())
-	}
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+	})
 }
 
 func TestGetUser(t *testing.T) {
-	db := tests.SetupDB(t)
-	defer tests.TearDownDB(t, db)
+	t.Run("allFields", func(t *testing.T) {
+		db := tests.SetupDB(t)
+		defer tests.TearDownDB(t, db)
 
-	// Arrange
-	database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
+		database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 
-	created, err := database.CreateUser(db)
-	if err != nil {
-		t.Fatalf("expected %s, received %s", "nil", err.Error())
-	}
+		created, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-	// Act
-	user := database.GetUser(db, created.Id)
+		user := database.GetUser(db, created.Id)
 
-	// Assert
-	if user == nil {
-		t.Fatalf("expected %s, received %s", "user", "nil")
-	}
+		if user == nil {
+			t.Fatalf("expected %s, received %s", "user", "nil")
+		}
+	})
 }

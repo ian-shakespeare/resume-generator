@@ -37,6 +37,8 @@ paths:
           $ref: '#/components/responses/IllegalInput'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/resumes/{resumeId}:
     get:
       description: Get specified resume
@@ -89,6 +91,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/resumes/{resumeId}/educations:
     get:
       description: Get all education records for the specified resume
@@ -114,6 +118,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
     post:
       description: Create an education record on the specified resume
       parameters:
@@ -145,6 +151,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/resumes/{resumeId}/work-experiences:
     get:
       description: Get all work experience records for the specified resume
@@ -170,6 +178,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
     post:
       description: Create a work experience record on the specified resume
       parameters:
@@ -208,6 +218,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/resumes/{resumeId}/projects:
     get:
       description: Get all projects records for the specified resume
@@ -233,6 +245,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
     post:
       description: Create a project record on the specified resume
       parameters:
@@ -271,6 +285,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
   schemas:
@@ -450,7 +466,30 @@ components:
   responses:
     IllegalInput:
       description: Illegal input for operation.
+      content:
+        text/plain:
+          schema:
+            type: string
     Unauthorized:
       description: Must be authorized to access resource.
+      content:
+        text/plain:
+          schema:
+            type: string
     NotFound:
       description: Entity not found.
+      content:
+        text/plain:
+          schema:
+            type: string
+    InternalError:
+      description: Action could not be completed.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              cause:
+                type: string
