@@ -1,0 +1,287 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Basic</title>
+    <meta name="description" content="Basic Resume" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Ian Shakespeare</h1>
+      <h2>Backend Developer</h2>
+    </header>
+    <main>
+      <aside>
+        <section id="contact">
+          <h3>Contact</h3>
+          <ul>
+            <li>ian@shakespeare.dev</li>
+            <li>+1 (000) 000-0000</li>
+            <li>Saint George, UT</li>
+            <li>ian-shakespeare-abb990197</li>
+            <li>ian-shakespeare</li>
+            <li>shakespeare.dev</li>
+          </ul>
+        </section>
+        <section id="education">
+          <h3>Education</h3>
+          <p>B.S.</p>
+          <p>Computer Science</p>
+          <p>Utah Tech University</p>
+          <p>August 2019 - May 2023</p>
+          <p>Saint George, UT</p>
+          <p>3.7/4.0</p>
+        </section>
+      </aside>
+      <section id="work-experience">
+        <h3>Work Experience</h3>
+        <section>
+          <h4>Principal App Developer</h4>
+          <h5>Wilson Electronics, LLC.</h5>
+          <p>June 2024 - current / Saint George, UT</p>
+          <ul>
+            <li>
+              Generate user stories for, collect and monitor UX analytics on
+              consumer facing mobile applications with more that one-hundred
+              thousand MAUs (monthly active users)
+            </li>
+            <li>
+              Develop high availablity, high performance authentication, file
+              syncing, and web store services
+            </li>
+            <li>
+              Review junior developer code, oversee source code merges, host
+              project reviews, write and maintain project documentation
+            </li>
+            <li>
+              Implement and maintain internal developer tools, SDKs, plugins,
+              data pipelines, corporate applications, and project management
+              systems
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h4>Software Developer</h4>
+          <h5>Wilson Electronics, LLC.</h5>
+          <p>August 2022 - June 2024 / Saint George, UT</p>
+          <ul>
+            <li>
+              Develop, deploy, and optimize multi-national consumer facing web
+              storefronts with tens of thousands of MAUs (monthly active users)
+            </li>
+            <li>
+              Maintain legacy mobile applications and implement replacements for
+              deprecated packages and services
+            </li>
+            <li>
+              Manage continuous integration and continuous delivery pipelines
+              using Git, GitHub Actions, automated testing, Heroku, and Vercel
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h4>Computer Science Teaching Assistant</h4>
+          <h5>Utah Tech University</h5>
+          <p>January 2022 - December 2022 / Saint George, UT</p>
+          <ul>
+            <li>Assist teaching staff with assignment grading</li>
+            <li>Tutor computer science students of all levels</li>
+          </ul>
+        </section>
+      </section>
+      <section id="projects">
+        <h3>Projects</h3>
+        <section>
+          <h4>Caravanner</h4>
+          <h5>Co-creator</h5>
+          <ul>
+            <li>
+              Built a cross-platform mobile app for travel oriented event
+              scheduling and group messaging
+            </li>
+            <li>
+              Implement real-time messaging with Web Sockets and PostgreSQL
+            </li>
+          </ul>
+        </section>
+        <section>
+          <h4>FlightOwl</h4>
+          <h5>Creator</h5>
+          <ul>
+            <li>
+              Built a multi-platform flight search engine and price tracker
+              using SvelteKit & Go
+            </li>
+            <li>Utilized React Native to create a mobile interface</li>
+          </ul>
+        </section>
+      </section>
+    </main>
+  </body>
+  <style>
+    @page {
+      size: auto;
+      margin: 2rem 0 2rem 0;
+    }
+
+    @page:footer {
+      display: none;
+    }
+
+    @page:header {
+      display: none;
+    }
+
+    * {
+      --amber: #fbbf24;
+      --light-gray: #f5f5f4;
+      font-family: sans-serif;
+      font-style: normal;
+      padding: 0;
+      margin: 0;
+      print-color-adjust: exact;
+    }
+
+    ul {
+      display: grid;
+      margin-left: 2.25rem;
+    }
+
+    h1 {
+      --padding-v: 0.125rem;
+      --padding-h: 3rem;
+      position: relative;
+      bottom: -1.5rem;
+      justify-self: center;
+      border-width: 1px;
+      background-color: white;
+      border-color: var(--amber);
+      border-style: solid;
+      padding: var(--padding-v) var(--padding-h) var(--padding-v)
+        var(--padding-h);
+      font-family: "Titillium Web", sans-serif;
+      text-transform: uppercase;
+      font-weight: 400;
+      font-size: 3rem;
+    }
+
+    h2 {
+      background-color: var(--light-gray);
+      padding-top: 2rem;
+      padding-bottom: 1rem;
+      font-weight: 300;
+      font-size: 1.75rem;
+      font-family: "Titillium Web", sans-serif;
+    }
+
+    h3 {
+      font-family: "Titillium Web", sans-serif;
+      text-transform: uppercase;
+      font-size: 1.375rem;
+      font-weight: 600;
+    }
+
+    h4 {
+      font-size: 1.3rem;
+      font-weight: 300;
+    }
+
+    h5 {
+      font-size: 1rem;
+      font-weight: 300;
+      margin-top: 0.25rem;
+      margin-bottom: 0.3rem;
+    }
+
+    li {
+      font-size: 0.825rem;
+      font-weight: 300;
+      line-height: 1.25;
+    }
+
+    p {
+      font-size: 1rem;
+      font-weight: 300;
+    }
+
+    header {
+      display: grid;
+      text-align: center;
+    }
+
+    main {
+      --padding-v: 2rem;
+      --padding-h: 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      grid-template-areas:
+        "aside experience"
+        "aside projects";
+      padding: var(--padding-v) var(--padding-h) var(--padding-v)
+        var(--padding-h);
+    }
+
+    aside {
+      grid-area: aside;
+      display: grid;
+      align-content: start;
+      gap: 2rem;
+      border-right-width: 2px;
+      border-right-color: var(--amber);
+      border-right-style: solid;
+      text-align: right;
+      padding-right: 1.5rem;
+    }
+
+    #contact {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    #contact > ul {
+      list-style-type: none;
+      margin-left: 0;
+      gap: 0.5rem;
+    }
+
+    #contact > ul > li {
+      line-height: 1;
+    }
+
+    #education {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    #education > p {
+      font-size: 1rem;
+    }
+
+    section > section {
+      display: grid;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    section > section > ul {
+      gap: 0.25rem;
+    }
+
+    #work-experience {
+      grid-area: experience;
+      padding-left: 1.5rem;
+    }
+
+    #projects {
+      grid-area: projects;
+      padding-left: 1.5rem;
+    }
+  </style>
+</html>

@@ -2,14 +2,14 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
-	"resumegenerator/tests"
+	"resumegenerator/test"
 	"testing"
 )
 
 func TestCreateUser(t *testing.T) {
 	t.Run("allFields", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations(), 1)
 
@@ -23,8 +23,8 @@ func TestCreateUser(t *testing.T) {
 
 func TestGetUser(t *testing.T) {
 	t.Run("allFields", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 

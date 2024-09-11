@@ -2,14 +2,14 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
-	"resumegenerator/tests"
+	"resumegenerator/test"
 	"testing"
 )
 
 func TestCreateProject(t *testing.T) {
 	t.Run("allFields", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -47,8 +47,8 @@ func TestCreateProject(t *testing.T) {
 
 func TestGetProject(t *testing.T) {
 	t.Run("allFields", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -92,8 +92,8 @@ func TestGetProject(t *testing.T) {
 
 func TestCreateProjectResposibility(t *testing.T) {
 	t.Run("allFields", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {

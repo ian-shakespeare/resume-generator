@@ -2,7 +2,7 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
-	"resumegenerator/tests"
+	"resumegenerator/test"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -10,8 +10,8 @@ import (
 
 func TestMigrateUp(t *testing.T) {
 	t.Run("toFutureVersion", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		query := `
 CREATE TABLE migrate_test_up (
@@ -39,8 +39,8 @@ CREATE TABLE migrate_test_up (
 	})
 
 	t.Run("toInitialVersion", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.MigrateUp(db, 0, "")
 
@@ -50,8 +50,8 @@ CREATE TABLE migrate_test_up (
 	})
 
 	t.Run("toPastVersion", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		query1 := `
 CREATE TABLE migrate_test_up_existing1 (
@@ -78,8 +78,8 @@ CREATE TABLE migrate_test_up_existing2 (
 
 func TestMigrateDown(t *testing.T) {
 	t.Run("toPastVersion", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		upQuery := `
 CREATE TABLE migrate_test_down (
@@ -112,8 +112,8 @@ CREATE TABLE migrate_test_down (
 	})
 
 	t.Run("toNegativeVersion", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.MigrateDown(db, -1, "")
 
@@ -123,8 +123,8 @@ CREATE TABLE migrate_test_down (
 	})
 
 	t.Run("toNonExistantVersion", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.MigrateDown(db, 1, "")
 
@@ -136,8 +136,8 @@ CREATE TABLE migrate_test_down (
 
 func TestApplyMigrations(t *testing.T) {
 	t.Run("all", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		up := []string{
 			"CREATE TABLE apply_migrations1 (id TEXT)",
@@ -173,8 +173,8 @@ func TestApplyMigrations(t *testing.T) {
 	})
 
 	t.Run("specific", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		up := []string{
 			"CREATE TABLE apply_migrations1 (id TEXT)",
@@ -215,8 +215,8 @@ func TestApplyMigrations(t *testing.T) {
 	})
 
 	t.Run("down", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		up := []string{
 			"CREATE TABLE apply_migrations1 (id TEXT)",
@@ -258,8 +258,8 @@ func TestApplyMigrations(t *testing.T) {
 	})
 
 	t.Run("downAll", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		// Arrange
 		up := []string{

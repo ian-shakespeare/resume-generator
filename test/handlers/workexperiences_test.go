@@ -9,15 +9,15 @@ import (
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
 	"resumegenerator/internal/handlers"
-	"resumegenerator/tests"
+	"resumegenerator/test"
 	"testing"
 	"time"
 )
 
-func TestHandleCreateEducation(t *testing.T) {
+func TestHandleCreateWorkExperience(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -26,11 +26,11 @@ func TestHandleCreateEducation(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 
-		handlers.HandleCreateEducation(w, r, a, db)
+		handlers.HandleCreateWorkExperience(w, r, a, db)
 
 		if w.StatusCode != 401 {
 			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
@@ -75,7 +75,7 @@ func TestHandleCreateEducation(t *testing.T) {
 		r.SetPathValue("resumeId", resume.Id)
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
-		handlers.HandleCreateEducation(w, r, a, db)
+		handlers.HandleCreateWorkExperience(w, r, a, db)
 
 		if w.StatusCode != 401 {
 			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
@@ -83,8 +83,8 @@ func TestHandleCreateEducation(t *testing.T) {
 	})
 
 	t.Run("notFound", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -93,7 +93,7 @@ func TestHandleCreateEducation(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 
@@ -110,7 +110,7 @@ func TestHandleCreateEducation(t *testing.T) {
 		r.SetPathValue("resumeId", "random")
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
-		handlers.HandleCreateEducation(w, r, a, db)
+		handlers.HandleCreateWorkExperience(w, r, a, db)
 
 		if w.StatusCode != 404 {
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
@@ -118,8 +118,8 @@ func TestHandleCreateEducation(t *testing.T) {
 	})
 
 	t.Run("invalidArgument", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -156,13 +156,13 @@ func TestHandleCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 		r.SetPathValue("resumeId", resume.Id)
 
-		handlers.HandleCreateEducation(w, r, a, db)
+		handlers.HandleCreateWorkExperience(w, r, a, db)
 
 		if w.StatusCode != 400 {
 			t.Fatalf("expected %d, received %d", 400, w.StatusCode)
@@ -170,8 +170,8 @@ func TestHandleCreateEducation(t *testing.T) {
 
 		w.StatusCode = 200
 
-		ne := handlers.NewEducation{
-			DegreeType: "",
+		ne := handlers.NewWorkExperience{
+			Employer: "",
 		}
 
 		body, err := json.Marshal(ne)
@@ -181,7 +181,7 @@ func TestHandleCreateEducation(t *testing.T) {
 
 		r.Body = io.NopCloser(bytes.NewReader(body))
 
-		handlers.HandleCreateEducation(w, r, a, db)
+		handlers.HandleCreateWorkExperience(w, r, a, db)
 
 		if w.StatusCode != 400 {
 			t.Fatalf("expected %d, received %d", 400, w.StatusCode)
@@ -189,8 +189,8 @@ func TestHandleCreateEducation(t *testing.T) {
 	})
 
 	t.Run("successful", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -227,14 +227,15 @@ func TestHandleCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
-		ne := handlers.NewEducation{
-			DegreeType:   "degree",
-			FieldOfStudy: "fieldOfStudy",
-			Institution:  "institution",
-			Began:        "1970-01-01T00:00:00.000Z",
-			Current:      true,
+		nr := make([]handlers.NewWorkResponsibility, 0)
+		ne := handlers.NewWorkExperience{
+			Employer:         "degree",
+			Title:            "fieldOfStudy",
+			Began:            "1970-01-01T00:00:00.000Z",
+			Current:          true,
+			Responsibilities: nr,
 		}
 
 		body, err := json.Marshal(ne)
@@ -246,28 +247,28 @@ func TestHandleCreateEducation(t *testing.T) {
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 		r.SetPathValue("resumeId", resume.Id)
 
-		handlers.HandleCreateEducation(w, r, a, db)
+		handlers.HandleCreateWorkExperience(w, r, a, db)
 
 		if w.StatusCode != 201 {
 			t.Fatalf("expected %d, received %d", 201, w.StatusCode)
 		}
 
-		var education database.Education
-		if err = json.Unmarshal(w.Body, &education); err != nil {
+		var workExperience database.WorkExperience
+		if err = json.Unmarshal(w.Body, &workExperience); err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		inserted := database.GetEducation(db, education.Id)
+		inserted := database.GetWorkExperience(db, workExperience.Id)
 		if inserted == nil {
-			t.Fatalf("expected %s, received %s", "education", "nil")
+			t.Fatalf("expected %s, received %s", "workExperience", "nil")
 		}
 	})
 }
 
-func TestHandleGetEducation(t *testing.T) {
+func TestHandleGetWorkExperience(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -276,11 +277,11 @@ func TestHandleGetEducation(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 
-		handlers.HandleGetEducations(w, r, a, db)
+		handlers.HandleGetWorkExperiences(w, r, a, db)
 
 		if w.StatusCode != 401 {
 			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
@@ -325,7 +326,7 @@ func TestHandleGetEducation(t *testing.T) {
 		r.SetPathValue("resumeId", resume.Id)
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
-		handlers.HandleGetEducations(w, r, a, db)
+		handlers.HandleGetWorkExperiences(w, r, a, db)
 
 		if w.StatusCode != 401 {
 			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
@@ -333,8 +334,8 @@ func TestHandleGetEducation(t *testing.T) {
 	})
 
 	t.Run("notFound", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -352,12 +353,12 @@ func TestHandleGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
-		handlers.HandleGetEducations(w, r, a, db)
+		handlers.HandleGetWorkExperiences(w, r, a, db)
 
 		if w.StatusCode != 404 {
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
@@ -367,7 +368,7 @@ func TestHandleGetEducation(t *testing.T) {
 
 		r.SetPathValue("resumeId", "BAD")
 
-		handlers.HandleGetEducations(w, r, a, db)
+		handlers.HandleGetWorkExperiences(w, r, a, db)
 
 		if w.StatusCode != 404 {
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
@@ -375,8 +376,8 @@ func TestHandleGetEducation(t *testing.T) {
 	})
 
 	t.Run("successful", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -385,7 +386,7 @@ func TestHandleGetEducation(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 
@@ -420,15 +421,13 @@ func TestHandleGetEducation(t *testing.T) {
 		}
 		r.SetPathValue("resumeId", resume.Id)
 
-		education, err := database.CreateEducation(
+		workExperience, err := database.CreateWorkExperience(
 			db,
 			&resume,
-			"degree",
-			"fieldOfStudy",
-			"institution",
+			"employer",
+			"title",
 			time.Now(),
 			true,
-			nil,
 			nil,
 			nil,
 		)
@@ -436,7 +435,7 @@ func TestHandleGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		handlers.HandleGetEducations(w, r, a, db)
+		handlers.HandleGetWorkExperiences(w, r, a, db)
 
 		if w.StatusCode != 200 {
 			t.Fatalf("expected %d, received %d", 200, w.StatusCode)
@@ -447,7 +446,7 @@ func TestHandleGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "application/json", contentType)
 		}
 
-		var e []database.Education
+		var e []database.WorkExperience
 		if err = json.Unmarshal(w.Body, &e); err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -456,8 +455,8 @@ func TestHandleGetEducation(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 1, len(e))
 		}
 
-		if e[0].Id != education.Id {
-			t.Fatalf("expected %s, received %s", education.Id, e[0].Id)
+		if e[0].Id != workExperience.Id {
+			t.Fatalf("expected %s, received %s", workExperience.Id, e[0].Id)
 		}
 	})
 }

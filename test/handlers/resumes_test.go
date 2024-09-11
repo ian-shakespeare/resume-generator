@@ -9,7 +9,7 @@ import (
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
 	"resumegenerator/internal/handlers"
-	"resumegenerator/tests"
+	"resumegenerator/test"
 	"testing"
 )
 
@@ -17,8 +17,8 @@ const TEST_SIGNING_KEY = "TESTKEY"
 
 func TestHandleCreateResume(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -27,7 +27,7 @@ func TestHandleCreateResume(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 		if err != nil {
@@ -57,8 +57,8 @@ func TestHandleCreateResume(t *testing.T) {
 	})
 
 	t.Run("invalidArgument", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -67,7 +67,7 @@ func TestHandleCreateResume(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		user, err := database.CreateUser(db)
 		if err != nil {
@@ -110,8 +110,8 @@ func TestHandleCreateResume(t *testing.T) {
 	})
 
 	t.Run("successful", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -120,7 +120,7 @@ func TestHandleCreateResume(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		user, err := database.CreateUser(db)
 		if err != nil {
@@ -176,8 +176,8 @@ func TestHandleCreateResume(t *testing.T) {
 
 func TestHandleGetResume(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -186,7 +186,7 @@ func TestHandleGetResume(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("GET", "", nil)
 		if err != nil {
@@ -247,8 +247,8 @@ func TestHandleGetResume(t *testing.T) {
 	})
 
 	t.Run("notFound", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -257,7 +257,7 @@ func TestHandleGetResume(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		user, err := database.CreateUser(db)
 		if err != nil {
@@ -281,8 +281,8 @@ func TestHandleGetResume(t *testing.T) {
 	})
 
 	t.Run("successful", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -291,7 +291,7 @@ func TestHandleGetResume(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		user, err := database.CreateUser(db)
 		if err != nil {

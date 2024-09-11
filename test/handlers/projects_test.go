@@ -9,14 +9,14 @@ import (
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
 	"resumegenerator/internal/handlers"
-	"resumegenerator/tests"
+	"resumegenerator/test"
 	"testing"
 )
 
 func TestHandleCreateProject(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -25,7 +25,7 @@ func TestHandleCreateProject(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 
@@ -82,8 +82,8 @@ func TestHandleCreateProject(t *testing.T) {
 	})
 
 	t.Run("notFound", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -92,7 +92,7 @@ func TestHandleCreateProject(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 
@@ -117,8 +117,8 @@ func TestHandleCreateProject(t *testing.T) {
 	})
 
 	t.Run("invalidArgument", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -155,7 +155,7 @@ func TestHandleCreateProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
@@ -188,8 +188,8 @@ func TestHandleCreateProject(t *testing.T) {
 	})
 
 	t.Run("successful", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -226,7 +226,7 @@ func TestHandleCreateProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		nr := make([]handlers.NewProjectResponsibility, 0)
 		np := handlers.NewProject{
@@ -265,8 +265,8 @@ func TestHandleCreateProject(t *testing.T) {
 
 func TestHandleGetProject(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -275,7 +275,7 @@ func TestHandleGetProject(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 
@@ -332,8 +332,8 @@ func TestHandleGetProject(t *testing.T) {
 	})
 
 	t.Run("notFound", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -351,7 +351,7 @@ func TestHandleGetProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
@@ -374,8 +374,8 @@ func TestHandleGetProject(t *testing.T) {
 	})
 
 	t.Run("successful", func(t *testing.T) {
-		db := tests.SetupDB(t)
-		defer tests.TearDownDB(t, db)
+		db := test.SetupDB(t)
+		defer test.TearDownDB(t, db)
 
 		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
 		if err != nil {
@@ -384,7 +384,7 @@ func TestHandleGetProject(t *testing.T) {
 
 		a := auth.New(TEST_SIGNING_KEY)
 
-		w := tests.NewDummyResponseWriter()
+		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
 

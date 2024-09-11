@@ -20,3 +20,11 @@ go.work.sum
 
 # Executable
 resume-generator
+
+# OS Files
+*.DS_Store
+
+# Editor Files
+.vscode
+.idea
+*.swp

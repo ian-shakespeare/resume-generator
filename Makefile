@@ -2,8 +2,9 @@ BIN := resume-generator
 CMD_DIR := cmd/resumegenerator/
 
 TEST_DIRS := \
-	./tests/database/... \
-	./tests/handlers/...
+	./test/database/... \
+	./test/handlers/... \
+	./test/generator/...
 
 all: run
 
