@@ -9,20 +9,6 @@ import (
 	"sync"
 )
 
-type NewResume struct {
-	Name        string  `json:"name"`
-	Email       string  `json:"email"`
-	PhoneNumber string  `json:"phoneNumber"`
-	Prelude     string  `json:"prelude"`
-	Location    *string `json:"location"`
-	LinkedIn    *string `json:"linkedIn"`
-	Github      *string `json:"github"`
-	Facebook    *string `json:"facebook"`
-	Instagram   *string `json:"instagram"`
-	Twitter     *string `json:"twitter"`
-	Portfolio   *string `json:"portfolio"`
-}
-
 func HandleCreateResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db database.VersionedDatabase) {
 	token, err := a.DecodeAuthHeader(r.Header)
 	if err != nil {
@@ -48,7 +34,19 @@ func HandleCreateResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db
 		return
 	}
 
-	var newResume NewResume
+	var newResume struct {
+		Name        string  `json:"name"`
+		Email       string  `json:"email"`
+		PhoneNumber string  `json:"phoneNumber"`
+		Prelude     string  `json:"prelude"`
+		Location    *string `json:"location"`
+		LinkedIn    *string `json:"linkedIn"`
+		Github      *string `json:"github"`
+		Facebook    *string `json:"facebook"`
+		Instagram   *string `json:"instagram"`
+		Twitter     *string `json:"twitter"`
+		Portfolio   *string `json:"portfolio"`
+	}
 	if err = json.Unmarshal(reqBody, &newResume); err != nil {
 		http.Error(w, "bad request", 400)
 		return

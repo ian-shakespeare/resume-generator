@@ -8,7 +8,7 @@ type workExperience struct {
 	Responsibilities []string
 }
 
-func NewWorkExperience(employer string, role string, location string, timeframe dateRange, responsibilities ...string) *workExperience {
+func WorkExperienceData(employer string, role string, location string, timeframe dateRange, responsibilities ...string) *workExperience {
 	return &workExperience{
 		Employer:         employer,
 		Role:             role,

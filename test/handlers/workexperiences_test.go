@@ -14,6 +14,18 @@ import (
 	"time"
 )
 
+type newWorkExperience struct {
+	Employer         string `json:"employer"`
+	Title            string `json:"title"`
+	Began            string `json:"began"`
+	Current          bool   `json:"current"`
+	Responsibilities []struct {
+		Responsibility string `json:"responsibility"`
+	} `json:"responsibilities"`
+	Location *string `json:"location"`
+	Finished *string `json:"finished"`
+}
+
 func TestHandleCreateWorkExperience(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
 		db := test.SetupDB(t)
@@ -170,7 +182,7 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 
 		w.StatusCode = 200
 
-		ne := handlers.NewWorkExperience{
+		ne := newWorkExperience{
 			Employer: "",
 		}
 
@@ -229,13 +241,14 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 
 		w := test.NewDummyResponseWriter()
 
-		nr := make([]handlers.NewWorkResponsibility, 0)
-		ne := handlers.NewWorkExperience{
-			Employer:         "degree",
-			Title:            "fieldOfStudy",
-			Began:            "1970-01-01T00:00:00.000Z",
-			Current:          true,
-			Responsibilities: nr,
+		ne := newWorkExperience{
+			Employer: "degree",
+			Title:    "fieldOfStudy",
+			Began:    "1970-01-01T00:00:00.000Z",
+			Current:  true,
+			Responsibilities: []struct {
+				Responsibility string `json:"responsibility"`
+			}{},
 		}
 
 		body, err := json.Marshal(ne)

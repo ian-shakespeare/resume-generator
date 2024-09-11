@@ -23,7 +23,7 @@ func WithGPA(gpa string) educationOption {
 	}
 }
 
-func NewEducation(degree string, fieldOfStudy string, institution string, timeframe dateRange, opts ...educationOption) *education {
+func EducationData(degree string, fieldOfStudy string, institution string, timeframe dateRange, opts ...educationOption) *education {
 	e := &education{
 		Degree:       degree,
 		FieldOfStudy: fieldOfStudy,

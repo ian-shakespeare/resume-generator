@@ -8,17 +8,6 @@ import (
 	"resumegenerator/internal/database"
 )
 
-type NewProjectResponsibility struct {
-	Responsibility string `json:"responsibility"`
-}
-
-type NewProject struct {
-	Name             string                     `json:"name"`
-	Description      string                     `json:"description"`
-	Role             string                     `json:"role"`
-	Responsibilities []NewProjectResponsibility `json:"responsibilities"`
-}
-
 func HandleCreateProject(w http.ResponseWriter, r *http.Request, a *auth.Auth, db database.VersionedDatabase) {
 	token, err := a.DecodeAuthHeader(r.Header)
 	if err != nil {
@@ -60,7 +49,14 @@ func HandleCreateProject(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		return
 	}
 
-	var p NewProject
+	var p struct {
+		Name             string `json:"name"`
+		Description      string `json:"description"`
+		Role             string `json:"role"`
+		Responsibilities []struct {
+			Responsibility string `json:"responsibility"`
+		} `json:"responsibilities"`
+	}
 	if err = json.Unmarshal(body, &p); err != nil {
 		http.Error(w, "bad request", 400)
 		return

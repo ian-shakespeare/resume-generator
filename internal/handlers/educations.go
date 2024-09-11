@@ -9,17 +9,6 @@ import (
 	"time"
 )
 
-type NewEducation struct {
-	DegreeType   string  `json:"degreeType"`
-	FieldOfStudy string  `json:"fieldOfStudy"`
-	Institution  string  `json:"institution"`
-	Began        string  `json:"began"`
-	Current      bool    `json:"current"`
-	Location     *string `json:"location"`
-	Finished     *string `json:"finished"`
-	GPA          *string `json:"gpa"`
-}
-
 func HandleCreateEducation(w http.ResponseWriter, r *http.Request, a *auth.Auth, db database.VersionedDatabase) {
 	token, err := a.DecodeAuthHeader(r.Header)
 	if err != nil {
@@ -56,7 +45,16 @@ func HandleCreateEducation(w http.ResponseWriter, r *http.Request, a *auth.Auth,
 		return
 	}
 
-	var ne NewEducation
+	var ne struct {
+		DegreeType   string  `json:"degreeType"`
+		FieldOfStudy string  `json:"fieldOfStudy"`
+		Institution  string  `json:"institution"`
+		Began        string  `json:"began"`
+		Current      bool    `json:"current"`
+		Location     *string `json:"location"`
+		Finished     *string `json:"finished"`
+		GPA          *string `json:"gpa"`
+	}
 	if err = json.Unmarshal(body, &ne); err != nil {
 		http.Error(w, "bad request", 400)
 		return
@@ -153,7 +151,7 @@ func HandleGetEducations(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		w.Write(internalError)
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(500)
-    return
+		return
 	}
 
 	response, err := json.Marshal(educations)
@@ -162,7 +160,7 @@ func HandleGetEducations(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		w.Write(internalError)
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(500)
-    return
+		return
 	}
 
 	w.Write(response)

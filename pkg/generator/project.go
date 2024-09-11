@@ -6,7 +6,7 @@ type project struct {
 	Responsibilities []string
 }
 
-func NewProject(name string, role string, responsibilities ...string) *project {
+func ProjectData(name string, role string, responsibilities ...string) *project {
 	return &project{
 		name,
 		role,

@@ -14,13 +14,15 @@ type NewWorkResponsibility struct {
 }
 
 type NewWorkExperience struct {
-	Employer         string                  `json:"employer"`
-	Title            string                  `json:"title"`
-	Began            string                  `json:"began"`
-	Current          bool                    `json:"current"`
-	Responsibilities []NewWorkResponsibility `json:"responsibilities"`
-	Location         *string                 `json:"location"`
-	Finished         *string                 `json:"finished"`
+	Employer         string `json:"employer"`
+	Title            string `json:"title"`
+	Began            string `json:"began"`
+	Current          bool   `json:"current"`
+	Responsibilities []struct {
+		Responsibility string `json:"responsibility"`
+	} `json:"responsibilities"`
+	Location *string `json:"location"`
+	Finished *string `json:"finished"`
 }
 
 func HandleCreateWorkExperience(w http.ResponseWriter, r *http.Request, a *auth.Auth, db database.VersionedDatabase) {
@@ -64,7 +66,17 @@ func HandleCreateWorkExperience(w http.ResponseWriter, r *http.Request, a *auth.
 		return
 	}
 
-	var we NewWorkExperience
+	var we struct {
+		Employer         string `json:"employer"`
+		Title            string `json:"title"`
+		Began            string `json:"began"`
+		Current          bool   `json:"current"`
+		Responsibilities []struct {
+			Responsibility string `json:"responsibility"`
+		} `json:"responsibilities"`
+		Location *string `json:"location"`
+		Finished *string `json:"finished"`
+	}
 	if err = json.Unmarshal(body, &we); err != nil {
 		http.Error(w, "bad request", 400)
 		return

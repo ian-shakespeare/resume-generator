@@ -15,6 +15,20 @@ import (
 
 const TEST_SIGNING_KEY = "TESTKEY"
 
+type newResume struct {
+	Name        string  `json:"name"`
+	Email       string  `json:"email"`
+	PhoneNumber string  `json:"phoneNumber"`
+	Prelude     string  `json:"prelude"`
+	Location    *string `json:"location"`
+	LinkedIn    *string `json:"linkedIn"`
+	Github      *string `json:"github"`
+	Facebook    *string `json:"facebook"`
+	Instagram   *string `json:"instagram"`
+	Twitter     *string `json:"twitter"`
+	Portfolio   *string `json:"portfolio"`
+}
+
 func TestHandleCreateResume(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
 		db := test.SetupDB(t)
@@ -94,7 +108,7 @@ func TestHandleCreateResume(t *testing.T) {
 
 		w.StatusCode = 200
 
-		resume := handlers.NewResume{
+		resume := newResume{
 			Name: "John Doe",
 		}
 		body, err = json.Marshal(resume)
@@ -132,7 +146,7 @@ func TestHandleCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume := handlers.NewResume{
+		resume := newResume{
 			Name:        "John Doe",
 			Email:       "jdoe@email.com",
 			PhoneNumber: "+1 (000) 000-0000",

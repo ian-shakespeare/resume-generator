@@ -19,7 +19,7 @@ type resumeData struct {
 
 type resumeOption func(r *resumeData)
 
-func NewResumeData(personName string, title string, email string, phoneNumber string, opts ...resumeOption) *resumeData {
+func ResumeData(personName string, title string, email string, phoneNumber string, opts ...resumeOption) *resumeData {
 	r := &resumeData{
 		Name:            personName,
 		Role:            title,

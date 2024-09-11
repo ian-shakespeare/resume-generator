@@ -14,6 +14,17 @@ import (
 	"time"
 )
 
+type newEducation struct {
+	DegreeType   string  `json:"degreeType"`
+	FieldOfStudy string  `json:"fieldOfStudy"`
+	Institution  string  `json:"institution"`
+	Began        string  `json:"began"`
+	Current      bool    `json:"current"`
+	Location     *string `json:"location"`
+	Finished     *string `json:"finished"`
+	GPA          *string `json:"gpa"`
+}
+
 func TestHandleCreateEducation(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
 		db := test.SetupDB(t)
@@ -170,7 +181,7 @@ func TestHandleCreateEducation(t *testing.T) {
 
 		w.StatusCode = 200
 
-		ne := handlers.NewEducation{
+		ne := newEducation{
 			DegreeType: "",
 		}
 
@@ -229,7 +240,7 @@ func TestHandleCreateEducation(t *testing.T) {
 
 		w := test.NewDummyResponseWriter()
 
-		ne := handlers.NewEducation{
+		ne := newEducation{
 			DegreeType:   "degree",
 			FieldOfStudy: "fieldOfStudy",
 			Institution:  "institution",

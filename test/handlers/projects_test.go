@@ -13,6 +13,15 @@ import (
 	"testing"
 )
 
+type newProject struct {
+	Name             string `json:"name"`
+	Description      string `json:"description"`
+	Role             string `json:"role"`
+	Responsibilities []struct {
+		Responsibility string `json:"responsibility"`
+	} `json:"responsibilities"`
+}
+
 func TestHandleCreateProject(t *testing.T) {
 	t.Run("unauthorized", func(t *testing.T) {
 		db := test.SetupDB(t)
@@ -169,7 +178,7 @@ func TestHandleCreateProject(t *testing.T) {
 
 		w.StatusCode = 200
 
-		ne := handlers.NewProject{
+		ne := newProject{
 			Name: "",
 		}
 
@@ -228,12 +237,13 @@ func TestHandleCreateProject(t *testing.T) {
 
 		w := test.NewDummyResponseWriter()
 
-		nr := make([]handlers.NewProjectResponsibility, 0)
-		np := handlers.NewProject{
-			Name:             "name",
-			Description:      "description",
-			Role:             "role",
-			Responsibilities: nr,
+		np := newProject{
+			Name:        "name",
+			Description: "description",
+			Role:        "role",
+			Responsibilities: []struct {
+				Responsibility string `json:"responsibility"`
+			}{},
 		}
 
 		body, err := json.Marshal(np)

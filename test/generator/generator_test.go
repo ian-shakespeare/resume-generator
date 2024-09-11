@@ -15,7 +15,7 @@ const TEST_TEMPLATE string = `<html>
 
 func TestGenerateHtml(t *testing.T) {
 	t.Run("minimumRequredFields", func(t *testing.T) {
-		data := generator.NewResumeData("name", "role", "email", "phoneNumber")
+		data := generator.ResumeData("name", "role", "email", "phoneNumber")
 
 		expected := `<html>
 <p>nameroleemailphoneNumber</p>
@@ -40,7 +40,7 @@ func TestGenerateHtml(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		data := generator.NewResumeData(
+		data := generator.ResumeData(
 			"name",
 			"role",
 			"email",
@@ -53,7 +53,7 @@ func TestGenerateHtml(t *testing.T) {
 			generator.WithTwitter("twitter"),
 			generator.WithPortfolio("portfolio"),
 			generator.WithEducation(
-				generator.NewEducation(
+				generator.EducationData(
 					"degree",
 					"fieldOfStudy",
 					"institution",
@@ -63,7 +63,7 @@ func TestGenerateHtml(t *testing.T) {
 				),
 			),
 			generator.WithWorkExperience(
-				generator.NewWorkExperience(
+				generator.WorkExperienceData(
 					"employer",
 					"role",
 					"location",
@@ -72,7 +72,7 @@ func TestGenerateHtml(t *testing.T) {
 				),
 			),
 			generator.WithProject(
-				generator.NewProject(
+				generator.ProjectData(
 					"name",
 					"role",
 					"responsibility",
