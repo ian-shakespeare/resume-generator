@@ -24,7 +24,7 @@ func MigrateUp(db VersionedDatabase, version int, query string) error {
 	}
 
 	if currentVersion >= version {
-		return errors.New(fmt.Sprintf("current version (%d) greater than version (%d)", currentVersion, version))
+		return fmt.Errorf("current version (%d) greater than version (%d)", currentVersion, version)
 	}
 
 	_, err = db.DB().Exec(query)
@@ -51,7 +51,7 @@ func MigrateDown(db VersionedDatabase, version int, query string) error {
 	}
 
 	if currentVersion < version {
-		return errors.New(fmt.Sprintf("current version (%d) greater than version (%d)", currentVersion, version))
+		return fmt.Errorf("current version (%d) greater than version (%d)", currentVersion, version)
 	}
 
 	_, err = db.DB().Exec(query)

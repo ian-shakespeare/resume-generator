@@ -1,6 +1,9 @@
 BIN := resume-generator
 CMD_DIR := cmd/resumegenerator/
-TESTS_DIR := ./tests/...
+
+TEST_DIRS := \
+	./tests/database/... \
+	./tests/handlers/...
 
 all: run
 
@@ -12,7 +15,7 @@ build:
 	mv $(CMD_DIR)$(BIN) ./
 
 test:
-	go test $(TESTS_DIR)
+	go test $(TEST_DIRS)
 
 clean:
 	go clean

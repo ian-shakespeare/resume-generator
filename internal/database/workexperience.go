@@ -2,8 +2,8 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
+	"resumegenerator/internal/utils"
 	"time"
 
 	"github.com/google/uuid"
@@ -73,7 +73,7 @@ INSERT INTO work_experiences (
 	if err != nil {
 		return WorkExperience{}, err
 	} else if rowsAffected != 1 {
-		return WorkExperience{}, errors.New(fmt.Sprintf("affected an unexpected number of rows (%d)", rowsAffected))
+		return WorkExperience{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
 	responsibilities := make([]WorkResponsibility, 0)
@@ -116,29 +116,12 @@ WHERE we.work_experience_id = ?
 		return nil
 	}
 
-	var workExperience *WorkExperience
-	responsibilities := make([]WorkResponsibility, 0)
-
-	for rows.Next() {
-		w, r, err := rowsToWorkExperience(rows)
-		if err != nil {
-			return nil
-		}
-
-		if workExperience == nil {
-			workExperience = &w
-		}
-
-		if r != nil {
-			responsibilities = append(responsibilities, *r)
-		}
+	workExperiences, err := rowsToWorkExperience(rows)
+	if err != nil || len(workExperiences) != 1 {
+		return nil
 	}
 
-	if workExperience != nil {
-		workExperience.Responsibilities = responsibilities
-	}
-
-	return workExperience
+	return &workExperiences[0]
 }
 
 func CreateWorkResponsibility(
@@ -170,7 +153,7 @@ INSERT INTO work_responsibilities (
 	if err != nil {
 		return WorkResponsibility{}, err
 	} else if rowsAffected != 1 {
-		return WorkResponsibility{}, errors.New(fmt.Sprintf("affected an unexpected number of rows (%d)", rowsAffected))
+		return WorkResponsibility{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
 	r := WorkResponsibility{
@@ -184,75 +167,88 @@ INSERT INTO work_responsibilities (
 	return r, nil
 }
 
-func rowsToWorkExperience(rows *sql.Rows) (WorkExperience, *WorkResponsibility, error) {
-	var we struct {
-		Id        string
-		ResumeId  string
-		Employer  string
-		Title     string
-		Began     int64
-		Current   int64
-		CreatedAt int64
-		Location  *string
-		Finished  *int64
+func rowsToWorkExperience(rows *sql.Rows) ([]WorkExperience, error) {
+	experiences := make([]WorkExperience, 0)
+
+	for rows.Next() {
+		var w struct {
+			Id        string
+			ResumeId  string
+			Employer  string
+			Title     string
+			Began     int64
+			Current   int64
+			CreatedAt int64
+			Location  *string
+			Finished  *int64
+		}
+
+		var r struct {
+			Id             *string
+			Responsibility *string
+			CreatedAt      *int64
+		}
+
+		if err := rows.Scan(
+			&w.Id,
+			&w.ResumeId,
+			&w.Employer,
+			&w.Title,
+			&w.Began,
+			&w.Current,
+			&w.CreatedAt,
+			&w.Location,
+			&w.Finished,
+			&r.Id,
+			&r.Responsibility,
+			&r.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		existingIndex := utils.Find(experiences, func(e WorkExperience) bool {
+			return w.Id == e.Id
+		})
+
+		if existingIndex == -1 {
+			current := false
+			if w.Current != 0 {
+				current = true
+			}
+			var finished *time.Time
+			if w.Finished != nil {
+				val := time.Unix(*w.Finished, 0)
+				finished = &val
+			}
+
+			workExperience := WorkExperience{
+				Id:        w.Id,
+				ResumeId:  w.ResumeId,
+				Employer:  w.Employer,
+				Title:     w.Title,
+				Began:     time.Unix(w.Began, 0),
+				Current:   current,
+				CreatedAt: time.Unix(w.CreatedAt, 0),
+				Location:  w.Location,
+				Finished:  finished,
+			}
+
+			experiences = append(experiences, workExperience)
+			existingIndex = len(experiences) - 1
+		}
+
+		if r.Id != nil {
+			createdAt := time.Unix(*r.CreatedAt, 0)
+
+			responsibility := WorkResponsibility{
+				Id:             *r.Id,
+				Responsibility: *r.Responsibility,
+				CreatedAt:      createdAt,
+			}
+
+			experiences[existingIndex].Responsibilities = append(experiences[existingIndex].Responsibilities, responsibility)
+		}
 	}
 
-	var r struct {
-		Id             *string
-		Responsibility *string
-		CreatedAt      *int64
-	}
-
-	if err := rows.Scan(
-		&we.Id,
-		&we.ResumeId,
-		&we.Employer,
-		&we.Title,
-		&we.Began,
-		&we.Current,
-		&we.CreatedAt,
-		&we.Location,
-		&we.Finished,
-		&r.Id,
-		&r.Responsibility,
-		&r.CreatedAt,
-	); err != nil {
-		return WorkExperience{}, nil, err
-	}
-
-	current := false
-	if we.Current != 0 {
-		current = true
-	}
-	var finished *time.Time
-	if we.Finished != nil {
-		val := time.Unix(*we.Finished, 0)
-		finished = &val
-	}
-
-	workExperience := WorkExperience{
-		Id:        we.Id,
-		ResumeId:  we.ResumeId,
-		Employer:  we.Employer,
-		Title:     we.Title,
-		Began:     time.Unix(we.Began, 0),
-		Current:   current,
-		CreatedAt: time.Unix(we.CreatedAt, 0),
-		Location:  we.Location,
-		Finished:  finished,
-	}
-
-	if r.Id == nil {
-		return workExperience, nil, nil
-	}
-
-	createdAt := time.Unix(*r.CreatedAt, 0)
-
-	responsibility := WorkResponsibility{
-		Id:             *r.Id,
-		Responsibility: *r.Responsibility,
-		CreatedAt:      createdAt,
-	}
-
-	return workExperience, &responsibility, nil
+	return experiences, nil
 }

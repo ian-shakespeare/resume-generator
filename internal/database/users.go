@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
@@ -31,7 +30,7 @@ VALUES (?, ?)
 	if err != nil {
 		return User{}, err
 	} else if rowsAffected != 1 {
-		return User{}, errors.New(fmt.Sprintf("affected an unexpected number of rows (%d)", rowsAffected))
+		return User{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
 	return User{Id: id, CreatedAt: createdAt}, nil

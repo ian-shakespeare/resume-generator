@@ -1,0 +1,495 @@
+openapi: 3.0.0
+
+info:
+  title: Resume Generator
+  description: A tool for generating re-usable resumes with customizable templates.
+  termsOfService: https://TODO.com
+  contact:
+    name: Ian Shakespeare
+    url: https://shakespeare.dev
+    email: ian@shakespeare.dev
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+
+servers: []
+
+paths:
+  /api/resumes:
+    post:
+      description: Creates a new resume
+      requestBody:
+        description: Resume details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewResume'
+      responses:
+        '201':
+          description: The newly created resume
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/resumes/{resumeId}:
+    get:
+      description: Get specified resume
+      parameters:
+        - name: resumeId
+          in: path
+          description: ID of the desired resume
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Resume, and secondary fields, with given ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resume:
+                    $ref: '#/components/schemas/Resume'
+                  education:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Education'
+                  workExperiences:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/WorkExperience'
+                        - type: object
+                          properties:
+                            responsibilities:
+                              type: array
+                              items:
+                                $ref: '#/components/schemas/WorkResponsibility'
+                  projects:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Project'
+                        - type: object
+                          properties:
+                            responsibilities:
+                              type: array
+                              items:
+                                $ref: '#/components/schemas/ProjectResponsibility'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/resumes/{resumeId}/educations:
+    get:
+      description: Get all education records for the specified resume
+      parameters:
+        - name: resumeId
+          in: path
+          description: ID of the target resume
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Education records for the given resume
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Education'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      description: Create an education record on the specified resume
+      parameters:
+        - name: resumeId
+          in: path
+          description: ID of the target resume
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Education details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEducation'
+      responses:
+        '201':
+          description: The newly created education
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Education'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/resumes/{resumeId}/work-experiences:
+    get:
+      description: Get all work experience records for the specified resume
+      parameters:
+        - name: resumeId
+          in: path
+          description: ID of the target resume
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Work experience records for the given resume
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkExperience'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      description: Create a work experience record on the specified resume
+      parameters:
+        - name: resumeId
+          in: path
+          description: ID of the target resume
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Work experience details
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/NewWorkExperience'
+                - type: object
+                  properties:
+                    responsibilities:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/NewWorkResponsibility'
+      responses:
+        '201':
+          description: The newly created work experience
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkExperience'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/resumes/{resumeId}/projects:
+    get:
+      description: Get all projects records for the specified resume
+      parameters:
+        - name: resumeId
+          in: path
+          description: ID of the target resume
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Project records for the given resume
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      description: Create a project record on the specified resume
+      parameters:
+        - name: resumeId
+          in: path
+          description: ID of the target resume
+          required: true
+          allowEmptyValue: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Project details
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/NewProject'
+                - type: object
+                  properties:
+                    responsibilities:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/NewProjectResponsibility'
+      responses:
+        '201':
+          description: The newly created project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/IllegalInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    NewResume:
+      type: object
+      required: [name, email, phoneNumber, prelude]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+        prelude:
+          type: string
+        location:
+          type: string
+        linkedIn:
+          type: string
+        github:
+          type: string
+        facebook:
+          type: string
+        instagram:
+          type: string
+        twitter:
+          type: string
+        portfolio:
+          type: string
+    Resume:
+      allOf:
+        - $ref: '#/components/schemas/NewResume'
+        - type: object
+          required: [id, userId, createdAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            userId:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+    NewEducation:
+      type: object
+      required: [degreeType, fieldOfStudy, institution, began, current]
+      properties:
+        degreeType:
+          type: string
+        fieldOfStudy:
+          type: string
+        institution:
+          type: string
+        began:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+        location:
+          type: string
+        finished:
+          type: string
+          format: date-time
+        gpa:
+          type: string
+    Education:
+      allOf:
+        - $ref: '#/components/schemas/NewEducation'
+        - type: object
+          required: [id, resumeId, createdAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            resumeId:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+    NewWorkExperience:
+      type: object
+      required: [employer, title, began, current, responsibilities]
+      properties:
+        employer:
+          type: string
+        title:
+          type: string
+        began:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+        location:
+          type: string
+        finished:
+          type: string
+          format: date-time
+    WorkExperience:
+      allOf:
+        - $ref: '#/components/schemas/NewWorkExperience'
+        - type: object
+          required: [id, resumeId, createdAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            resumeId:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+    NewWorkResponsibility:
+      type: object
+      required: [responsibility]
+      properties:
+        responsibility:
+          type: string
+    WorkResponsibility:
+      allOf:
+        - $ref: '#/components/schemas/NewWorkResponsibility'
+        - type: object
+          required: [id, createdAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+    NewProject:
+      type: object
+      required: [name, role, responsibilities]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        role:
+          type: string
+    Project:
+      allOf:
+        - $ref: '#/components/schemas/NewProject'
+        - type: object
+          required: [id, resumeId, createdAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            resumeId:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+    NewProjectResponsibility:
+      type: object
+      required: [responsibility]
+      properties:
+        responsibility:
+          type: string
+    ProjectResponsibility:
+      allOf:
+        - $ref: '#/components/schemas/NewProjectResponsibility'
+        - type: object
+          required: [id, createdAt]
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+  responses:
+    IllegalInput:
+      description: Illegal input for operation.
+      content:
+        text/plain:
+          schema:
+            type: string
+    Unauthorized:
+      description: Must be authorized to access resource.
+      content:
+        text/plain:
+          schema:
+            type: string
+    NotFound:
+      description: Entity not found.
+      content:
+        text/plain:
+          schema:
+            type: string
+    InternalError:
+      description: Action could not be completed.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              cause:
+                type: string

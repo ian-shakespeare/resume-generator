@@ -85,6 +85,7 @@ CREATE TABLE projects (
   project_id VARCHAR(36) PRIMARY KEY,
   resume_id VARCHAR(36) NOT NULL,
   name VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
   role VARCHAR(255) NOT NULL,
   created_at INTEGER NOT NULL, --> TIMESTAMP
 
