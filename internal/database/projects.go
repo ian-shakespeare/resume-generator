@@ -4,37 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"resumegenerator/internal/utils"
+	"resumegenerator/pkg/resume"
 	"time"
-
-	"github.com/google/uuid"
 )
-
-type ProjectResponsibility struct {
-	Id             string    `json:"id"`
-	Responsibility string    `json:"responsibility"`
-	CreatedAt      time.Time `json:"createdAt"`
-}
-
-type Project struct {
-	Id               string                  `json:"id"`
-	ResumeId         string                  `json:"resumeId"`
-	Name             string                  `json:"name"`
-	Description      string                  `json:"description"`
-	Role             string                  `json:"role"`
-	Responsibilities []ProjectResponsibility `json:"responsibilities"`
-	CreatedAt        time.Time               `json:"createdAt"`
-}
 
 func CreateProject(
 	db VersionedDatabase,
-	resume *Resume,
-	name string,
-	description string,
-	role string,
-) (Project, error) {
-	id := uuid.New().String()
-	createdAt := time.Now()
-
+	r *resume.Resume,
+	p *resume.Project,
+) error {
 	query := `
 INSERT INTO projects (
   project_id,
@@ -49,31 +27,30 @@ INSERT INTO projects (
 )
   `
 
-	result, err := db.DB().Exec(query, id, resume.Id, name, description, role, createdAt.Unix())
+	result, err := db.DB().Exec(
+		query,
+		p.Id,
+		r.Id,
+		p.Name,
+		p.Description,
+		p.Role,
+		p.CreatedAt.Unix(),
+	)
 	if err != nil {
-		return Project{}, err
+		return err
 	}
-
+	// TODO: Create project responsibility.
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return Project{}, err
+		return err
 	} else if rowsAffected != 1 {
-		return Project{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
+		return fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
-	responsibilities := make([]ProjectResponsibility, 0)
-	return Project{
-		Id:               id,
-		ResumeId:         resume.Id,
-		Name:             name,
-		Description:      description,
-		Role:             role,
-		CreatedAt:        createdAt,
-		Responsibilities: responsibilities,
-	}, nil
+	return nil
 }
 
-func GetProject(db VersionedDatabase, id string) *Project {
+func GetProject(db VersionedDatabase, id string) *resume.Project {
 	query := `
 SELECT
   p.project_id,
@@ -103,54 +80,11 @@ WHERE p.project_id = ?
 	return &projects[0]
 }
 
-func CreateProjectResponsibility(
-	db VersionedDatabase,
-	project *Project,
-	responsibility string,
-) (ProjectResponsibility, error) {
-	id := uuid.New().String()
-	createdAt := time.Now()
-
-	query := `
-INSERT INTO project_responsibilities (
-  project_responsibility_id,
-  project_id,
-  responsibility,
-  created_at
-) VALUES (
-  ?, ?, ?,
-  ?
-)
-  `
-
-	result, err := db.DB().Exec(query, id, project.Id, responsibility, createdAt.Unix())
-	if err != nil {
-		return ProjectResponsibility{}, err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return ProjectResponsibility{}, err
-	} else if rowsAffected != 1 {
-		return ProjectResponsibility{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
-	}
-
-	r := ProjectResponsibility{
-		Id:             id,
-		Responsibility: responsibility,
-		CreatedAt:      createdAt,
-	}
-
-	project.Responsibilities = append(project.Responsibilities, r)
-
-	return r, nil
-}
-
-func rowsToProject(rows *sql.Rows) ([]Project, error) {
-	projects := make([]Project, 0)
+func rowsToProject(rows *sql.Rows) ([]resume.Project, error) {
+	projects := make([]resume.Project, 0)
 
 	for rows.Next() {
-		var p struct {
+		var sp struct {
 			Id          string
 			ResumeId    string
 			Name        string
@@ -166,12 +100,12 @@ func rowsToProject(rows *sql.Rows) ([]Project, error) {
 		}
 
 		if err := rows.Scan(
-			&p.Id,
-			&p.ResumeId,
-			&p.Name,
-			&p.Description,
-			&p.Role,
-			&p.CreatedAt,
+			&sp.Id,
+			&sp.ResumeId,
+			&sp.Name,
+			&sp.Description,
+			&sp.Role,
+			&sp.CreatedAt,
 			&r.Id,
 			&r.Responsibility,
 			&r.CreatedAt,
@@ -179,31 +113,24 @@ func rowsToProject(rows *sql.Rows) ([]Project, error) {
 			return nil, err
 		}
 
-		existingIndex := utils.Find(projects, func(pr Project) bool {
-			return p.Id == pr.Id
+		existingIndex := utils.Find(projects, func(p resume.Project) bool {
+			return sp.Id == p.Id
 		})
 
 		if existingIndex == -1 {
-			project := Project{
-				Id:          p.Id,
-				ResumeId:    p.ResumeId,
-				Name:        p.Name,
-				Description: p.Description,
-				Role:        p.Role,
-				CreatedAt:   time.Unix(p.CreatedAt, 0),
+			p := resume.Project{
+				Id:          sp.Id,
+				Name:        sp.Name,
+				Description: sp.Description,
+				Role:        sp.Role,
+				CreatedAt:   time.Unix(sp.CreatedAt, 0),
 			}
-			projects = append(projects, project)
+			projects = append(projects, p)
 			existingIndex = len(projects) - 1
 		}
 
 		if r.Id != nil {
-			createdAt := time.Unix(*r.CreatedAt, 0)
-			responsibility := ProjectResponsibility{
-				Id:             *r.Id,
-				Responsibility: *r.Responsibility,
-				CreatedAt:      createdAt,
-			}
-			projects[existingIndex].Responsibilities = append(projects[existingIndex].Responsibilities, responsibility)
+			projects[existingIndex].Responsibilities = append(projects[existingIndex].Responsibilities, *r.Responsibility)
 		}
 	}
 

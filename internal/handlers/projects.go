@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
+	"resumegenerator/pkg/resume"
 )
 
 func HandleCreateProject(w http.ResponseWriter, r *http.Request, a *auth.Auth, db database.VersionedDatabase) {
@@ -27,14 +28,9 @@ func HandleCreateProject(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		return
 	}
 
-	resume := database.GetResume(db, resumeId)
-	if resume == nil || resume.Id == "" {
+	res := database.GetResume(db, resumeId, userId)
+	if res == nil || res.Id == "" {
 		http.Error(w, "not found", 404)
-		return
-	}
-
-	if userId != resume.UserId {
-		http.Error(w, "unauthorized", 401)
 		return
 	}
 
@@ -49,15 +45,8 @@ func HandleCreateProject(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		return
 	}
 
-	var p struct {
-		Name             string `json:"name"`
-		Description      string `json:"description"`
-		Role             string `json:"role"`
-		Responsibilities []struct {
-			Responsibility string `json:"responsibility"`
-		} `json:"responsibilities"`
-	}
-	if err = json.Unmarshal(body, &p); err != nil {
+	p, err := resume.ProjectFromJSON(body)
+	if err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
@@ -67,7 +56,7 @@ func HandleCreateProject(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		return
 	}
 
-	project, err := database.CreateProject(db, resume, p.Name, p.Description, p.Role)
+	err = database.CreateProject(db, res, &p)
 	if err != nil {
 		internalErr, _ := newInternalError(err, "cannot create project")
 		w.Write(internalErr)
@@ -76,18 +65,7 @@ func HandleCreateProject(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		return
 	}
 
-	for _, responsibility := range p.Responsibilities {
-		_, err = database.CreateProjectResponsibility(db, &project, responsibility.Responsibility)
-		if err != nil {
-			internalErr, _ := newInternalError(err, "cannot create project responsibility")
-			w.Write(internalErr)
-			w.Header().Set("content-type", "application/json")
-			w.WriteHeader(500)
-			return
-		}
-	}
-
-	response, err := json.Marshal(project)
+	response, err := json.Marshal(&p)
 	if err != nil {
 		internalErr, _ := newInternalError(err, "cannot send project")
 		w.Write(internalErr)
@@ -120,18 +98,13 @@ func HandleGetProjects(w http.ResponseWriter, r *http.Request, a *auth.Auth, db 
 		return
 	}
 
-	resume := database.GetResume(db, resumeId)
-	if resume == nil || resume.Id == "" {
+	res := database.GetResume(db, resumeId, userId)
+	if res == nil || res.Id == "" {
 		http.Error(w, "not found", 404)
 		return
 	}
 
-	if userId != resume.UserId {
-		http.Error(w, "unauthorized", 401)
-		return
-	}
-
-	projects, err := resume.Projects(db)
+	projects, err := database.ResumeProjects(db, res)
 	if err != nil {
 		internalError, _ := newInternalError(err, "cannot get projects")
 		w.Write(internalError)

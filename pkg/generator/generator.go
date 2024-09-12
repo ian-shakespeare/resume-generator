@@ -3,17 +3,18 @@ package generator
 import (
 	"bytes"
 	"html/template"
+	"resumegenerator/pkg/resume"
 )
 
-func (r *resumeData) GenerateHtml(tmplStr string) (string, error) {
-	tmpl, err := template.New("tmpl").Parse(tmplStr)
+func GenerateHtml(r *resume.Resume, tmpl string) (string, error) {
+	t, err := template.New("tmpl").Parse(tmpl)
 	if err != nil {
 		return "", err
 	}
 
 	buf := new(bytes.Buffer)
 
-	if err = tmpl.Execute(buf, r); err != nil {
+	if err = t.Execute(buf, r); err != nil {
 		return "", err
 	}
 

@@ -2,9 +2,9 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
+	"resumegenerator/pkg/resume"
 	"resumegenerator/test"
 	"testing"
-	"time"
 )
 
 func TestCreateResume(t *testing.T) {
@@ -22,20 +22,15 @@ func TestCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		_, err = database.CreateResume(
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(
 			db,
 			&user,
-			"John Doe",
-			"jdoe@email.com",
-			"+1 (000) 000-0000",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
+			&r,
 		)
 
 		if err != nil {
@@ -57,28 +52,15 @@ func TestCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		location := "SOME_PLACE"
-		linkedIn := "SOME_LINKEDIN"
-		github := "SOME_GITHUB"
-		facebook := "SOME_FACEBOOK"
-		instagram := "SOME_INSTAGRAM"
-		twitter := "SOME_TWITTER"
-		portfolio := "SOME_PORTFOLIO"
+		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		_, err = database.CreateResume(
+		err = database.CreateResume(
 			db,
 			&user,
-			"John Doe",
-			"jdoe@email.com",
-			"+1 (000) 000-0000",
-			"prelude",
-			&location,
-			&linkedIn,
-			&github,
-			&facebook,
-			&instagram,
-			&twitter,
-			&portfolio,
+			&r,
 		)
 
 		if err != nil {
@@ -102,29 +84,24 @@ func TestGetResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		created, err := database.CreateResume(
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(
 			db,
 			&user,
-			"John Doe",
-			"jdoe@email.com",
-			"+1 (000) 000-0000",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
+			&r,
 		)
 
-		resume := database.GetResume(db, created.Id)
+		stored := database.GetResume(db, r.Id, user.Id)
 
-		if resume == nil {
+		if stored == nil {
 			t.Fatalf("expected %s, received %s", "resume", "nil")
 		}
-		if resume.Location != nil {
-			t.Fatalf("expected %s, received %p", "nil", resume.Location)
+		if stored.Location != "" {
+			t.Fatalf("expected %s, received %s", "nil", stored.Location)
 		}
 	})
 
@@ -142,37 +119,24 @@ func TestGetResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		location := "SOME_PLACE"
-		linkedIn := "SOME_LINKEDIN"
-		github := "SOME_GITHUB"
-		facebook := "SOME_FACEBOOK"
-		instagram := "SOME_INSTAGRAM"
-		twitter := "SOME_TWITTER"
-		portfolio := "SOME_PORTFOLIO"
+		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		created, err := database.CreateResume(
+		err = database.CreateResume(
 			db,
 			&user,
-			"John Doe",
-			"jdoe@email.com",
-			"+1 (000) 000-0000",
-			"prelude",
-			&location,
-			&linkedIn,
-			&github,
-			&facebook,
-			&instagram,
-			&twitter,
-			&portfolio,
+			&r,
 		)
 
-		resume := database.GetResume(db, created.Id)
+		stored := database.GetResume(db, r.Id, user.Id)
 
-		if resume == nil {
+		if stored == nil {
 			t.Fatalf("expected %s, received %s", "resume", "nil")
 		}
-		if *resume.Location != location {
-			t.Fatalf("expected %s, received %s", location, *resume.Location)
+		if stored.Location != r.Location {
+			t.Fatalf("expected %s, received %s", r.Location, stored.Location)
 		}
 	})
 }
@@ -192,26 +156,17 @@ func TestResumeGetEducations(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		educations, err := resume.Educations(db)
+		err = database.CreateResume(db, &user, &r)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		educations, err := database.ResumeEducations(db, &r)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -234,42 +189,27 @@ func TestResumeGetEducations(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		education, err := database.CreateEducation(
-			db,
-			&resume,
-			"degree",
-			"fieldOfStudy",
-			"institution",
-			time.Now(),
-			true,
-			nil,
-			nil,
-			nil,
-		)
+		err = database.CreateResume(db, &user, &r)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		educations, err := resume.Educations(db)
+		e, err := resume.EducationFromJSON([]byte(test.MIN_EDUCATION))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateEducation(db, &r, &e)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		educations, err := database.ResumeEducations(db, &r)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
@@ -279,8 +219,8 @@ func TestResumeGetEducations(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 1, len(educations))
 		}
 
-		if educations[0].Id != education.Id {
-			t.Fatalf("expected %s, received %s", education.Id, educations[0].Id)
+		if educations[0].Id != e.Id {
+			t.Fatalf("expected %s, received %s", e.Id, educations[0].Id)
 		}
 	})
 }
@@ -300,26 +240,17 @@ func TestResumeGetWorkExperiences(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		workExperiences, err := resume.WorkExperiences(db)
+		err = database.CreateResume(db, &user, &r)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		workExperiences, err := database.ResumeWorkExperiences(db, &r)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -343,40 +274,27 @@ func TestResumeGetWorkExperiences(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		workExperience, err := database.CreateWorkExperience(
-			db,
-			&resume,
-			"employer",
-			"title",
-			time.Now(),
-			true,
-			nil,
-			nil,
-		)
+		err = database.CreateResume(db, &user, &r)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		workExperiences, err := resume.WorkExperiences(db)
+		w, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateWorkExperience(db, &r, &w)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		workExperiences, err := database.ResumeWorkExperiences(db, &r)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
@@ -386,8 +304,8 @@ func TestResumeGetWorkExperiences(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 1, len(workExperiences))
 		}
 
-		if workExperiences[0].Id != workExperience.Id {
-			t.Fatalf("expected %s, received %s", workExperience.Id, workExperiences[0].Id)
+		if workExperiences[0].Id != w.Id {
+			t.Fatalf("expected %s, received %s", w.Id, workExperiences[0].Id)
 		}
 	})
 }
@@ -407,26 +325,17 @@ func TestResumeGetProjects(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		projects, err := resume.Projects(db)
+		err = database.CreateResume(db, &user, &r)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		projects, err := database.ResumeProjects(db, &r)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -450,37 +359,27 @@ func TestResumeGetProjects(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		project, err := database.CreateProject(
-			db,
-			&resume,
-			"name",
-			"description",
-			"role",
-		)
+		err = database.CreateResume(db, &user, &r)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		projects, err := resume.Projects(db)
+		p, err := resume.ProjectFromJSON([]byte(test.PROJECT))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateProject(db, &r, &p)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		projects, err := database.ResumeProjects(db, &r)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
@@ -490,8 +389,8 @@ func TestResumeGetProjects(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 1, len(projects))
 		}
 
-		if projects[0].Id != project.Id {
-			t.Fatalf("expected %s, received %s", project.Id, projects[0].Id)
+		if projects[0].Id != p.Id {
+			t.Fatalf("expected %s, received %s", p.Id, projects[0].Id)
 		}
 	})
 }

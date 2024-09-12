@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
+	"resumegenerator/pkg/resume"
 	"sync"
 )
 
@@ -28,26 +29,14 @@ func HandleCreateResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db
 		return
 	}
 
-	reqBody, err := io.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
 
-	var newResume struct {
-		Name        string  `json:"name"`
-		Email       string  `json:"email"`
-		PhoneNumber string  `json:"phoneNumber"`
-		Prelude     string  `json:"prelude"`
-		Location    *string `json:"location"`
-		LinkedIn    *string `json:"linkedIn"`
-		Github      *string `json:"github"`
-		Facebook    *string `json:"facebook"`
-		Instagram   *string `json:"instagram"`
-		Twitter     *string `json:"twitter"`
-		Portfolio   *string `json:"portfolio"`
-	}
-	if err = json.Unmarshal(reqBody, &newResume); err != nil {
+	newResume, err := resume.FromJSON(body)
+	if err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
@@ -57,22 +46,7 @@ func HandleCreateResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db
 		return
 	}
 
-	resume, err := database.CreateResume(
-		db,
-		user,
-		newResume.Name,
-		newResume.Email,
-		newResume.PhoneNumber,
-		newResume.Prelude,
-		newResume.Location,
-		newResume.LinkedIn,
-		newResume.Github,
-		newResume.Facebook,
-		newResume.Instagram,
-		newResume.Twitter,
-		newResume.Portfolio,
-	)
-	if err != nil {
+	if err = database.CreateResume(db, user, &newResume); err != nil {
 		internalErr, _ := newInternalError(err, "cannot create resume")
 		w.Write(internalErr)
 		w.WriteHeader(500)
@@ -80,7 +54,7 @@ func HandleCreateResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db
 		return
 	}
 
-	response, err := json.Marshal(resume)
+	response, err := json.Marshal(newResume)
 	if err != nil {
 		internalErr, _ := newInternalError(err, "cannot send resume")
 		w.Write(internalErr)
@@ -95,10 +69,10 @@ func HandleCreateResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db
 }
 
 type FullResume struct {
-	Resume         database.Resume           `json:"resume"`
-	Education      []database.Education      `json:"education"`
-	WorkExperience []database.WorkExperience `json:"workExperiences"`
-	Projects       []database.Project        `json:"projects"`
+	Resume         resume.Resume           `json:"resume"`
+	Education      []resume.Education      `json:"education"`
+	WorkExperience []resume.WorkExperience `json:"workExperiences"`
+	Projects       []resume.Project        `json:"projects"`
 }
 
 func HandleGetResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db database.VersionedDatabase) {
@@ -126,28 +100,23 @@ func HandleGetResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db da
 		return
 	}
 
-	resume := database.GetResume(db, resumeId)
-	if resume == nil || resume.Id == "" {
+	res := database.GetResume(db, resumeId, userId)
+	if res == nil || res.Id == "" {
 		http.Error(w, "not found", 404)
-		return
-	}
-
-	if resume.UserId != user.Id {
-		http.Error(w, "unauthorized", 401)
 		return
 	}
 
 	wg := sync.WaitGroup{}
 	wg.Add(3)
 
-	var educations []database.Education
-	var workExperiences []database.WorkExperience
-	var projects []database.Project
+	var educations []resume.Education
+	var workExperiences []resume.WorkExperience
+	var projects []resume.Project
 	var dbErr error
 
 	go func() {
 		defer wg.Done()
-		educations, err = resume.Educations(db)
+		educations, err = database.ResumeEducations(db, res)
 		if err != nil && dbErr == nil {
 			dbErr = err
 		}
@@ -155,7 +124,7 @@ func HandleGetResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db da
 
 	go func() {
 		defer wg.Done()
-		workExperiences, err = resume.WorkExperiences(db)
+		workExperiences, err = database.ResumeWorkExperiences(db, res)
 		if err != nil && dbErr == nil {
 			dbErr = err
 		}
@@ -163,7 +132,7 @@ func HandleGetResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db da
 
 	go func() {
 		defer wg.Done()
-		projects, err = resume.Projects(db)
+		projects, err = database.ResumeProjects(db, res)
 		if err != nil && dbErr == nil {
 			dbErr = err
 		}
@@ -180,7 +149,7 @@ func HandleGetResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db da
 	}
 
 	fullResume := FullResume{
-		Resume:         *resume,
+		Resume:         *res,
 		Education:      educations,
 		WorkExperience: workExperiences,
 		Projects:       projects,

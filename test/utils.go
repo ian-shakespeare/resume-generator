@@ -63,3 +63,9 @@ func (d *DummyResponseWriter) Write(b []byte) (int, error) {
 func (d *DummyResponseWriter) WriteHeader(statusCode int) {
 	d.StatusCode = statusCode
 }
+
+func (d *DummyResponseWriter) Reset() {
+	d.StatusCode = 200
+	d.Body = nil
+	d.Headers = http.Header{}
+}

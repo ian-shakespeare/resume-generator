@@ -68,25 +68,11 @@ paths:
                   workExperiences:
                     type: array
                     items:
-                      allOf:
-                        - $ref: '#/components/schemas/WorkExperience'
-                        - type: object
-                          properties:
-                            responsibilities:
-                              type: array
-                              items:
-                                $ref: '#/components/schemas/WorkResponsibility'
+                      $ref: '#/components/schemas/WorkExperience'
                   projects:
                     type: array
                     items:
-                      allOf:
-                        - $ref: '#/components/schemas/Project'
-                        - type: object
-                          properties:
-                            responsibilities:
-                              type: array
-                              items:
-                                $ref: '#/components/schemas/ProjectResponsibility'
+                      $ref: '#/components/schemas/Project'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -204,7 +190,7 @@ paths:
                     responsibilities:
                       type: array
                       items:
-                        $ref: '#/components/schemas/NewWorkResponsibility'
+                        type: string
       responses:
         '201':
           description: The newly created work experience
@@ -271,7 +257,7 @@ paths:
                     responsibilities:
                       type: array
                       items:
-                        $ref: '#/components/schemas/NewProjectResponsibility'
+                        type: string
       responses:
         '201':
           description: The newly created project
@@ -321,12 +307,9 @@ components:
       allOf:
         - $ref: '#/components/schemas/NewResume'
         - type: object
-          required: [id, userId, createdAt]
+          required: [id, createdAt]
           properties:
             id:
-              type: string
-              format: uuid
-            userId:
               type: string
               format: uuid
             createdAt:
@@ -387,6 +370,10 @@ components:
         finished:
           type: string
           format: date-time
+        responsibilities:
+          type: array
+          items:
+            type: string
     WorkExperience:
       allOf:
         - $ref: '#/components/schemas/NewWorkExperience'
@@ -402,24 +389,6 @@ components:
             createdAt:
               type: string
               format: date-time
-    NewWorkResponsibility:
-      type: object
-      required: [responsibility]
-      properties:
-        responsibility:
-          type: string
-    WorkResponsibility:
-      allOf:
-        - $ref: '#/components/schemas/NewWorkResponsibility'
-        - type: object
-          required: [id, createdAt]
-          properties:
-            id:
-              type: string
-              format: uuid
-            createdAt:
-              type: string
-              format: date-time
     NewProject:
       type: object
       required: [name, role, responsibilities]
@@ -430,6 +399,10 @@ components:
           type: string
         role:
           type: string
+        responsibilities:
+          type: array
+          items:
+            type: string
     Project:
       allOf:
         - $ref: '#/components/schemas/NewProject'
@@ -440,24 +413,6 @@ components:
               type: string
               format: uuid
             resumeId:
-              type: string
-              format: uuid
-            createdAt:
-              type: string
-              format: date-time
-    NewProjectResponsibility:
-      type: object
-      required: [responsibility]
-      properties:
-        responsibility:
-          type: string
-    ProjectResponsibility:
-      allOf:
-        - $ref: '#/components/schemas/NewProjectResponsibility'
-        - type: object
-          required: [id, createdAt]
-          properties:
-            id:
               type: string
               format: uuid
             createdAt:

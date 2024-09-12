@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -111,4 +113,28 @@ func ApplyMigrations(db VersionedDatabase, up []string, down []string, version .
 	}
 
 	return nil
+}
+
+func strToStrPtr(s string) *string {
+	var p *string
+	if s != "" {
+		p = &s
+	}
+	return p
+}
+
+func strPtrToStr(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
+}
+
+func timePtrToIntPtr(t *time.Time) *int64 {
+	var p *int64
+	if t != nil {
+		val := t.Unix()
+		p = &val
+	}
+	return p
 }

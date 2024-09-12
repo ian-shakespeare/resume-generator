@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
-	"time"
+	"resumegenerator/pkg/resume"
 )
 
 func HandleCreateEducation(w http.ResponseWriter, r *http.Request, a *auth.Auth, db database.VersionedDatabase) {
@@ -23,14 +23,9 @@ func HandleCreateEducation(w http.ResponseWriter, r *http.Request, a *auth.Auth,
 	}
 
 	resumeId := r.PathValue("resumeId")
-	resume := database.GetResume(db, resumeId)
-	if resume == nil || resume.Id == "" {
+	res := database.GetResume(db, resumeId, userId)
+	if res == nil || res.Id == "" {
 		http.Error(w, "not found", 404)
-		return
-	}
-
-	if userId != resume.UserId {
-		http.Error(w, "unauthorized", 401)
 		return
 	}
 
@@ -45,54 +40,18 @@ func HandleCreateEducation(w http.ResponseWriter, r *http.Request, a *auth.Auth,
 		return
 	}
 
-	var ne struct {
-		DegreeType   string  `json:"degreeType"`
-		FieldOfStudy string  `json:"fieldOfStudy"`
-		Institution  string  `json:"institution"`
-		Began        string  `json:"began"`
-		Current      bool    `json:"current"`
-		Location     *string `json:"location"`
-		Finished     *string `json:"finished"`
-		GPA          *string `json:"gpa"`
-	}
-	if err = json.Unmarshal(body, &ne); err != nil {
-		http.Error(w, "bad request", 400)
-		return
-	}
-
-	if ne.DegreeType == "" || ne.FieldOfStudy == "" || ne.Institution == "" || ne.Began == "" {
-		http.Error(w, "bad request", 400)
-		return
-	}
-
-	began, err := time.Parse(time.RFC3339, ne.Began)
+	e, err := resume.EducationFromJSON(body)
 	if err != nil {
 		http.Error(w, "bad request", 400)
 		return
 	}
 
-	var finished *time.Time
-	if ne.Finished != nil {
-		val, err := time.Parse(time.RFC3339, *ne.Finished)
-		if err != nil {
-			http.Error(w, "bad request", 400)
-			return
-		}
-		finished = &val
+	if e.DegreeType == "" || e.FieldOfStudy == "" || e.Institution == "" {
+		http.Error(w, "bad request", 400)
+		return
 	}
 
-	education, err := database.CreateEducation(
-		db,
-		resume,
-		ne.DegreeType,
-		ne.FieldOfStudy,
-		ne.Institution,
-		began,
-		ne.Current,
-		ne.Location,
-		finished,
-		ne.GPA,
-	)
+	err = database.CreateEducation(db, res, &e)
 	if err != nil {
 		internalError, _ := newInternalError(err, "cannot create education")
 		w.Write(internalError)
@@ -101,7 +60,7 @@ func HandleCreateEducation(w http.ResponseWriter, r *http.Request, a *auth.Auth,
 		return
 	}
 
-	response, err := json.Marshal(education)
+	response, err := json.Marshal(e)
 	if err != nil {
 		internalError, _ := newInternalError(err, "cannot send education")
 		w.Write(internalError)
@@ -134,18 +93,13 @@ func HandleGetEducations(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		return
 	}
 
-	resume := database.GetResume(db, resumeId)
-	if resume == nil || resume.Id == "" {
+	res := database.GetResume(db, resumeId, userId)
+	if res == nil || res.Id == "" {
 		http.Error(w, "not found", 404)
 		return
 	}
 
-	if userId != resume.UserId {
-		http.Error(w, "unauthorized", 401)
-		return
-	}
-
-	educations, err := resume.Educations(db)
+	educations, err := database.ResumeEducations(db, res)
 	if err != nil {
 		internalError, _ := newInternalError(err, "cannot get educations")
 		w.Write(internalError)

@@ -2,9 +2,9 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
+	"resumegenerator/pkg/resume"
 	"resumegenerator/test"
 	"testing"
-	"time"
 )
 
 func TestCreateEducation(t *testing.T) {
@@ -22,34 +22,22 @@ func TestCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"John Doe",
-			"jdoe@email.com",
-			"+1 (000) 000-0000",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		_, err = database.CreateEducation(
-			db,
-			&resume,
-			"degree",
-			"fieldOfStudy",
-			"institution",
-			time.Now(),
-			true,
-			nil,
-			nil,
-			nil,
-		)
+		err = database.CreateResume(db, &user, &r)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		e, err := resume.EducationFromJSON([]byte(test.MIN_EDUCATION))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateEducation(db, &r, &e)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
@@ -69,38 +57,23 @@ func TestCreateEducation(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"John Doe",
-			"jdoe@email.com",
-			"+1 (000) 000-0000",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
 
-		location := "SOME_PLACE"
-		finished := time.Now()
-		gpa := "SOME_GPA"
+		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		_, err = database.CreateEducation(
-			db,
-			&resume,
-			"BS",
-			"Computer Science",
-			"Utah Tech University",
-			time.Now(),
-			true,
-			&location,
-			&finished,
-			&gpa,
-		)
+		err = database.CreateResume(db, &user, &r)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		e, err := resume.EducationFromJSON([]byte(test.FULL_EDUCATION))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateEducation(db, &r, &e)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
@@ -123,46 +96,34 @@ func TestGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"John Doe",
-			"jdoe@email.com",
-			"+1 (000) 000-0000",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		created, err := database.CreateEducation(
-			db,
-			&resume,
-			"BS",
-			"Computer Science",
-			"Utah Tech University",
-			time.Now(),
-			true,
-			nil,
-			nil,
-			nil,
-		)
+		err = database.CreateResume(db, &user, &r)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		e, err := resume.EducationFromJSON([]byte(test.MIN_EDUCATION))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateEducation(db, &r, &e)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		education := database.GetEducation(db, created.Id)
+		education := database.GetEducation(db, e.Id)
 
 		if education == nil {
 			t.Fatalf("expected %s, received %s", "education", "nil")
 		}
-		if education.Location != nil {
-			t.Fatalf("expected %s, received %p", "nil", education.Location)
+		if education.Location != "" {
+			t.Fatalf("expected %s, received %s", "", education.Location)
 		}
 	})
 
@@ -180,50 +141,34 @@ func TestGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"John Doe",
-			"jdoe@email.com",
-			"+1 (000) 000-0000",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		location := "SOME_PLACE"
-		finished := time.Now()
-		gpa := "SOME_GPA"
+		err = database.CreateResume(db, &user, &r)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		created, err := database.CreateEducation(
-			db,
-			&resume,
-			"BS",
-			"Computer Science",
-			"Utah Tech University",
-			time.Now(),
-			true,
-			&location,
-			&finished,
-			&gpa,
-		)
+		e, err := resume.EducationFromJSON([]byte(test.FULL_EDUCATION))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateEducation(db, &r, &e)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		education := database.GetEducation(db, created.Id)
+		education := database.GetEducation(db, e.Id)
 
 		if education == nil {
 			t.Fatalf("expected %s, received %s", "education", "nil")
 		}
-		if *education.Location != location {
-			t.Fatalf("expected %s, received %s", location, *education.Location)
+		if education.Location != e.Location {
+			t.Fatalf("expected %s, received %s", e.Location, education.Location)
 		}
 	})
 }

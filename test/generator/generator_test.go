@@ -2,29 +2,33 @@ package generator_test
 
 import (
 	"resumegenerator/pkg/generator"
+	"resumegenerator/pkg/resume"
+	"resumegenerator/test"
 	"testing"
-	"time"
 )
 
 const TEST_TEMPLATE string = `<html>
-<p>{{.Name}}{{.Role}}{{.Email}}{{.PhoneNumber}}{{.Location}}{{.LinkedIn}}{{.Github}}{{.Facebook}}{{.Instagram}}{{.Twitter}}{{.Portfolio}}</p>
-{{range .Educations}}<section>{{.Degree}}{{.FieldOfStudy}}{{.Institution}}{{.Timeframe.Began}}{{if .Timeframe.Current}}current{{end}}{{.Timeframe.Finished}}{{.Location}}{{.GPA}}</section>{{end}}
+<p>{{.Name}}{{.Email}}{{.PhoneNumber}}{{.Location}}{{.LinkedIn}}{{.Github}}{{.Facebook}}{{.Instagram}}{{.Twitter}}{{.Portfolio}}</p>
+{{range .Educations}}<section>{{.DegreeType}}{{.FieldOfStudy}}{{.Institution}}{{.Timeframe.Began}}{{if .Timeframe.Current}}current{{end}}{{.Timeframe.Finished}}{{.Location}}{{.GPA}}</section>{{end}}
 {{range .WorkExperiences}}<section>{{.Employer}}{{.Role}}{{.Timeframe.Began}}{{if .Timeframe.Current}}current{{end}}{{.Timeframe.Finished}}{{.Location}}<ul>{{range .Responsibilities}}<li>{{.}}</li>{{end}}</ul></section>{{end}}
 {{range .Projects}}<section>{{.Name}}{{.Role}}<ul>{{range .Responsibilities}}<li>{{.}}</li>{{end}}</ul></section>{{end}}
 </html>`
 
 func TestGenerateHtml(t *testing.T) {
 	t.Run("minimumRequredFields", func(t *testing.T) {
-		data := generator.ResumeData("name", "role", "email", "phoneNumber")
-
 		expected := `<html>
-<p>nameroleemailphoneNumber</p>
+<p>nameemailphoneNumber</p>
 
 
 
 </html>`
 
-		received, err := data.GenerateHtml(TEST_TEMPLATE)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		received, err := generator.GenerateHtml(&r, TEST_TEMPLATE)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -35,59 +39,38 @@ func TestGenerateHtml(t *testing.T) {
 	})
 
 	t.Run("allFields", func(t *testing.T) {
-		d, err := time.Parse(time.RFC3339, "1970-01-01T00:00:00.000Z")
+		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		data := generator.ResumeData(
-			"name",
-			"role",
-			"email",
-			"phoneNumber",
-			generator.WithLocation("location"),
-			generator.WithLinkedIn("linkedIn"),
-			generator.WithGitHub("github"),
-			generator.WithFacebook("facebook"),
-			generator.WithInstagram("instagram"),
-			generator.WithTwitter("twitter"),
-			generator.WithPortfolio("portfolio"),
-			generator.WithEducation(
-				generator.EducationData(
-					"degree",
-					"fieldOfStudy",
-					"institution",
-					generator.CurrentDateRange(d),
-					generator.WithInstitutionLocation("location"),
-					generator.WithGPA("gpa"),
-				),
-			),
-			generator.WithWorkExperience(
-				generator.WorkExperienceData(
-					"employer",
-					"role",
-					"location",
-					generator.CurrentDateRange(d),
-					"responsibility",
-				),
-			),
-			generator.WithProject(
-				generator.ProjectData(
-					"name",
-					"role",
-					"responsibility",
-				),
-			),
-		)
+		e, err := resume.EducationFromJSON([]byte(test.FULL_EDUCATION))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		w, err := resume.WorkExperienceFromJSON([]byte(test.FULL_WORK_EXPERIENCE))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		p, err := resume.ProjectFromJSON([]byte(test.PROJECT))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		r.AddEducation(e)
+		r.AddWorkExperiences(w)
+		r.AddProject(p)
 
 		expected := `<html>
-<p>nameroleemailphoneNumberlocationlinkedIngithubfacebookinstagramtwitterportfolio</p>
+<p>nameemailphoneNumberlocationlinkedIngithubfacebookinstagramtwitterportfolio</p>
 <section>degreefieldOfStudyinstitutionJanuary 1970currentlocationgpa</section>
 <section>employerroleJanuary 1970currentlocation<ul><li>responsibility</li></ul></section>
 <section>namerole<ul><li>responsibility</li></ul></section>
 </html>`
 
-		received, err := data.GenerateHtml(TEST_TEMPLATE)
+		received, err := generator.GenerateHtml(&r, TEST_TEMPLATE)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}

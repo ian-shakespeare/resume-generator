@@ -9,6 +9,7 @@ import (
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
 	"resumegenerator/internal/handlers"
+	"resumegenerator/pkg/resume"
 	"resumegenerator/test"
 	"testing"
 )
@@ -37,51 +38,6 @@ func TestHandleCreateProject(t *testing.T) {
 		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
-
-		handlers.HandleCreateProject(w, r, a, db)
-
-		if w.StatusCode != 401 {
-			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
-		}
-
-		w.StatusCode = 200
-
-		user1, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		token, err := a.GenToken(&user1)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		user2, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		resume, err := database.CreateResume(
-			db,
-			&user2,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		r.SetPathValue("resumeId", resume.Id)
-		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
 		handlers.HandleCreateProject(w, r, a, db)
 
@@ -123,6 +79,42 @@ func TestHandleCreateProject(t *testing.T) {
 		if w.StatusCode != 404 {
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
 		}
+
+		w.Reset()
+
+		user1, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		token, err = a.GenToken(&user1)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		user2, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user2, &res)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		r.SetPathValue("resumeId", res.Id)
+		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
+
+		handlers.HandleCreateProject(w, r, a, db)
+
+		if w.StatusCode != 404 {
+			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
+		}
 	})
 
 	t.Run("invalidArgument", func(t *testing.T) {
@@ -139,21 +131,12 @@ func TestHandleCreateProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user, &res)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -168,7 +151,7 @@ func TestHandleCreateProject(t *testing.T) {
 
 		r, err := http.NewRequest("POST", "", nil)
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
-		r.SetPathValue("resumeId", resume.Id)
+		r.SetPathValue("resumeId", res.Id)
 
 		handlers.HandleCreateProject(w, r, a, db)
 
@@ -176,7 +159,7 @@ func TestHandleCreateProject(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 400, w.StatusCode)
 		}
 
-		w.StatusCode = 200
+		w.Reset()
 
 		ne := newProject{
 			Name: "",
@@ -210,21 +193,12 @@ func TestHandleCreateProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user, &res)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -253,7 +227,7 @@ func TestHandleCreateProject(t *testing.T) {
 
 		r, err := http.NewRequest("POST", "", io.NopCloser(bytes.NewReader(body)))
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
-		r.SetPathValue("resumeId", resume.Id)
+		r.SetPathValue("resumeId", res.Id)
 
 		handlers.HandleCreateProject(w, r, a, db)
 
@@ -261,7 +235,7 @@ func TestHandleCreateProject(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 201, w.StatusCode)
 		}
 
-		var project database.Project
+		var project resume.Project
 		if err = json.Unmarshal(w.Body, &project); err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -288,51 +262,6 @@ func TestHandleGetProject(t *testing.T) {
 		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
-
-		handlers.HandleGetProjects(w, r, a, db)
-
-		if w.StatusCode != 401 {
-			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
-		}
-
-		w.StatusCode = 200
-
-		user1, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		token, err := a.GenToken(&user1)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		user2, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		resume, err := database.CreateResume(
-			db,
-			&user2,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		r.SetPathValue("resumeId", resume.Id)
-		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
 		handlers.HandleGetProjects(w, r, a, db)
 
@@ -372,13 +301,38 @@ func TestHandleGetProject(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
 		}
 
-		w.StatusCode = 200
+		w.Reset()
 
 		r.SetPathValue("resumeId", "BAD")
 
 		handlers.HandleGetProjects(w, r, a, db)
 
 		if w.StatusCode != 404 {
+			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
+		}
+
+		w.Reset()
+
+		otherUser, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &otherUser, &res)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+		r.SetPathValue("resumeId", res.Id)
+
+		handlers.HandleGetProjects(w, r, a, db)
+
+		if w.StatusCode != 404 {
+			t.Log(string(w.Body))
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
 		}
 	})
@@ -409,33 +363,23 @@ func TestHandleGetProject(t *testing.T) {
 		}
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
-		r.SetPathValue("resumeId", resume.Id)
 
-		project, err := database.CreateProject(
-			db,
-			&resume,
-			"name",
-			"description",
-			"role",
-		)
+		err = database.CreateResume(db, &user, &res)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+		r.SetPathValue("resumeId", res.Id)
+
+		p, err := resume.ProjectFromJSON([]byte(test.PROJECT))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateProject(db, &res, &p)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -451,17 +395,17 @@ func TestHandleGetProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "application/json", contentType)
 		}
 
-		var e []database.Project
-		if err = json.Unmarshal(w.Body, &e); err != nil {
+		var projects []resume.Project
+		if err = json.Unmarshal(w.Body, &projects); err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		if len(e) != 1 {
-			t.Fatalf("expected %d, received %d", 1, len(e))
+		if len(projects) != 1 {
+			t.Fatalf("expected %d, received %d", 1, len(projects))
 		}
 
-		if e[0].Id != project.Id {
-			t.Fatalf("expected %s, received %s", project.Id, e[0].Id)
+		if projects[0].Id != p.Id {
+			t.Fatalf("expected %s, received %s", p.Id, projects[0].Id)
 		}
 	})
 }

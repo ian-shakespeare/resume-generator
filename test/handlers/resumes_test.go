@@ -9,6 +9,7 @@ import (
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
 	"resumegenerator/internal/handlers"
+	"resumegenerator/pkg/resume"
 	"resumegenerator/test"
 	"testing"
 )
@@ -53,7 +54,7 @@ func TestHandleCreateResume(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
 		}
 
-		w.StatusCode = 200
+		w.Reset()
 
 		r.Header.Add("authorization", "Bearer")
 		handlers.HandleCreateResume(w, r, a, db)
@@ -61,7 +62,7 @@ func TestHandleCreateResume(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
 		}
 
-		w.StatusCode = 200
+		w.Reset()
 
 		r.Header.Set("authorization", "Bearer BAD_TOKEN")
 		handlers.HandleCreateResume(w, r, a, db)
@@ -106,7 +107,7 @@ func TestHandleCreateResume(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 400, w.StatusCode)
 		}
 
-		w.StatusCode = 200
+		w.Reset()
 
 		resume := newResume{
 			Name: "John Doe",
@@ -146,18 +147,7 @@ func TestHandleCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume := newResume{
-			Name:        "John Doe",
-			Email:       "jdoe@email.com",
-			PhoneNumber: "+1 (000) 000-0000",
-			Prelude:     "This is a resume",
-		}
-		body, err := json.Marshal(resume)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		r, err := http.NewRequest("POST", "", bytes.NewReader(body))
+		r, err := http.NewRequest("POST", "", bytes.NewReader([]byte(test.MIN_RESUME)))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -174,13 +164,13 @@ func TestHandleCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "application/json", contentType)
 		}
 
-		var response database.Resume
+		var response resume.Resume
 		err = json.Unmarshal(w.Body, &response)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		stored := database.GetResume(db, response.Id)
+		stored := database.GetResume(db, response.Id, user.Id)
 
 		if stored == nil {
 			t.Fatalf("expected %s, received %s", "resume", "nil")
@@ -206,52 +196,6 @@ func TestHandleGetResume(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
-
-		handlers.HandleGetResume(w, r, a, db)
-
-		if w.StatusCode != 401 {
-			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
-		}
-
-		w.StatusCode = 200
-
-		thisUser, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		token, err := a.GenToken(&thisUser)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		r.Header.Set("authorization", fmt.Sprintf("Bearer %s", token))
-
-		otherUser, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		resume, err := database.CreateResume(
-			db,
-			&otherUser,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		r.SetPathValue("resumeId", resume.Id)
 
 		handlers.HandleGetResume(w, r, a, db)
 
@@ -292,6 +236,33 @@ func TestHandleGetResume(t *testing.T) {
 		if w.StatusCode != 404 {
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
 		}
+
+		w.Reset()
+
+		r.Header.Set("authorization", fmt.Sprintf("Bearer %s", token))
+
+		otherUser, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &otherUser, &res)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		r.SetPathValue("resumeId", res.Id)
+
+		handlers.HandleGetResume(w, r, a, db)
+
+		if w.StatusCode != 404 {
+			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
+		}
 	})
 
 	t.Run("successful", func(t *testing.T) {
@@ -312,21 +283,12 @@ func TestHandleGetResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user, &res)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -337,7 +299,7 @@ func TestHandleGetResume(t *testing.T) {
 		}
 
 		r, err := http.NewRequest("GET", "", nil)
-		r.SetPathValue("resumeId", resume.Id)
+		r.SetPathValue("resumeId", res.Id)
 		r.Header.Set("authorization", fmt.Sprintf("Bearer %s", token))
 
 		handlers.HandleGetResume(w, r, a, db)
@@ -357,8 +319,8 @@ func TestHandleGetResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		if response.Resume.Id != resume.Id {
-			t.Fatalf("expected %s, received %s", resume.Id, response.Resume.Id)
+		if response.Resume.Id != res.Id {
+			t.Fatalf("expected %s, received %s", res.Id, response.Resume.Id)
 		}
 	})
 }

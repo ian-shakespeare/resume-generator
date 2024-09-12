@@ -9,9 +9,9 @@ import (
 	"resumegenerator/internal/auth"
 	"resumegenerator/internal/database"
 	"resumegenerator/internal/handlers"
+	"resumegenerator/pkg/resume"
 	"resumegenerator/test"
 	"testing"
-	"time"
 )
 
 type newWorkExperience struct {
@@ -41,51 +41,6 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
-
-		handlers.HandleCreateWorkExperience(w, r, a, db)
-
-		if w.StatusCode != 401 {
-			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
-		}
-
-		w.StatusCode = 200
-
-		user1, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		token, err := a.GenToken(&user1)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		user2, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		resume, err := database.CreateResume(
-			db,
-			&user2,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		r.SetPathValue("resumeId", resume.Id)
-		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
 		handlers.HandleCreateWorkExperience(w, r, a, db)
 
@@ -127,6 +82,42 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 		if w.StatusCode != 404 {
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
 		}
+
+		w.StatusCode = 200
+
+		user1, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		token, err = a.GenToken(&user1)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		user2, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user2, &res)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		r.SetPathValue("resumeId", res.Id)
+		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
+
+		handlers.HandleCreateWorkExperience(w, r, a, db)
+
+		if w.StatusCode != 404 {
+			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
+		}
 	})
 
 	t.Run("invalidArgument", func(t *testing.T) {
@@ -143,21 +134,12 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user, &res)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -172,7 +154,7 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 
 		r, err := http.NewRequest("POST", "", nil)
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
-		r.SetPathValue("resumeId", resume.Id)
+		r.SetPathValue("resumeId", res.Id)
 
 		handlers.HandleCreateWorkExperience(w, r, a, db)
 
@@ -214,21 +196,12 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user, &res)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -258,7 +231,7 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 
 		r, err := http.NewRequest("POST", "", io.NopCloser(bytes.NewReader(body)))
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
-		r.SetPathValue("resumeId", resume.Id)
+		r.SetPathValue("resumeId", res.Id)
 
 		handlers.HandleCreateWorkExperience(w, r, a, db)
 
@@ -266,7 +239,7 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 201, w.StatusCode)
 		}
 
-		var workExperience database.WorkExperience
+		var workExperience resume.WorkExperience
 		if err = json.Unmarshal(w.Body, &workExperience); err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -293,51 +266,6 @@ func TestHandleGetWorkExperience(t *testing.T) {
 		w := test.NewDummyResponseWriter()
 
 		r, err := http.NewRequest("POST", "", nil)
-
-		handlers.HandleGetWorkExperiences(w, r, a, db)
-
-		if w.StatusCode != 401 {
-			t.Fatalf("expected %d, received %d", 401, w.StatusCode)
-		}
-
-		w.StatusCode = 200
-
-		user1, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		token, err := a.GenToken(&user1)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		user2, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		resume, err := database.CreateResume(
-			db,
-			&user2,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		r.SetPathValue("resumeId", resume.Id)
-		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
 		handlers.HandleGetWorkExperiences(w, r, a, db)
 
@@ -386,6 +314,42 @@ func TestHandleGetWorkExperience(t *testing.T) {
 		if w.StatusCode != 404 {
 			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
 		}
+
+		w.StatusCode = 200
+
+		user1, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		token, err = a.GenToken(&user1)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		user2, err := database.CreateUser(db)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user2, &res)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		r.SetPathValue("resumeId", res.Id)
+		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
+
+		handlers.HandleGetWorkExperiences(w, r, a, db)
+
+		if w.StatusCode != 404 {
+			t.Fatalf("expected %d, received %d", 404, w.StatusCode)
+		}
 	})
 
 	t.Run("successful", func(t *testing.T) {
@@ -414,36 +378,23 @@ func TestHandleGetWorkExperience(t *testing.T) {
 		}
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phoneNumber",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
-		r.SetPathValue("resumeId", resume.Id)
 
-		workExperience, err := database.CreateWorkExperience(
-			db,
-			&resume,
-			"employer",
-			"title",
-			time.Now(),
-			true,
-			nil,
-			nil,
-		)
+		err = database.CreateResume(db, &user, &res)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+		r.SetPathValue("resumeId", res.Id)
+
+		we, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateWorkExperience(db, &res, &we)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -459,7 +410,7 @@ func TestHandleGetWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "application/json", contentType)
 		}
 
-		var e []database.WorkExperience
+		var e []resume.WorkExperience
 		if err = json.Unmarshal(w.Body, &e); err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -468,8 +419,8 @@ func TestHandleGetWorkExperience(t *testing.T) {
 			t.Fatalf("expected %d, received %d", 1, len(e))
 		}
 
-		if e[0].Id != workExperience.Id {
-			t.Fatalf("expected %s, received %s", workExperience.Id, e[0].Id)
+		if e[0].Id != we.Id {
+			t.Fatalf("expected %s, received %s", we.Id, e[0].Id)
 		}
 	})
 }

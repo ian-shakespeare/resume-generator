@@ -2,9 +2,9 @@ package database_test
 
 import (
 	"resumegenerator/internal/database"
+	"resumegenerator/pkg/resume"
 	"resumegenerator/test"
 	"testing"
-	"time"
 )
 
 func TestCreateWorkExperience(t *testing.T) {
@@ -22,24 +22,26 @@ func TestCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
+		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(
 			db,
 			&user,
-			"name",
-			"email",
-			"phone number",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
+			&r,
 		)
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		_, err = database.CreateWorkExperience(db, &resume, "employer", "title", time.Now(), true, nil, nil)
+		w, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
+		err = database.CreateWorkExperience(db, &r, &w)
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -59,25 +61,19 @@ func TestCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phone number",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		location := "location"
-		finished := time.Now()
-		_, err = database.CreateWorkExperience(db, &resume, "employer", "title", time.Now(), true, &location, &finished)
+		w, err := resume.WorkExperienceFromJSON([]byte(test.FULL_WORK_EXPERIENCE))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user, &r)
+
+		err = database.CreateWorkExperience(db, &r, &w)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
@@ -100,29 +96,25 @@ func TestGetWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phone number",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		created, err := database.CreateWorkExperience(db, &resume, "employer", "title", time.Now(), true, nil, nil)
+		w, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user, &r)
+
+		err = database.CreateWorkExperience(db, &r, &w)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		workExperience := database.GetWorkExperience(db, created.Id)
+		workExperience := database.GetWorkExperience(db, w.Id)
 
 		if workExperience == nil {
 			t.Fatalf("expected %s, received %s", "workExperience", "nil")
@@ -143,87 +135,31 @@ func TestGetWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phone number",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
+		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
 
-		location := "location"
-		finished := time.Now()
-		created, err := database.CreateWorkExperience(db, &resume, "employer", "title", time.Now(), true, &location, &finished)
+		w, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		if err != nil {
+			t.Fatalf("expected %s, received %s", "nil", err.Error())
+		}
+
+		err = database.CreateResume(db, &user, &r)
+
+		err = database.CreateWorkExperience(db, &r, &w)
 
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		workExperience := database.GetWorkExperience(db, created.Id)
+		workExperience := database.GetWorkExperience(db, w.Id)
 
 		if workExperience == nil {
 			t.Fatalf("expected %s, received %s", "workExperience", "nil")
 		}
-		if *workExperience.Location != location {
-			t.Fatalf("expected %s, received %s", location, *workExperience.Location)
-		}
-	})
-}
-
-func TestCreateWorkResposibility(t *testing.T) {
-	t.Run("allFields", func(t *testing.T) {
-		db := test.SetupDB(t)
-		defer test.TearDownDB(t, db)
-
-		err := database.ApplyMigrations(db, database.UpMigrations(), database.DownMigrations())
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		user, err := database.CreateUser(db)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		resume, err := database.CreateResume(
-			db,
-			&user,
-			"name",
-			"email",
-			"phone number",
-			"prelude",
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
-
-		workExperience, err := database.CreateWorkExperience(db, &resume, "employer", "title", time.Now(), true, nil, nil)
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "workExperience", "nil")
-		}
-
-		responsibility, err := database.CreateWorkResponsibility(db, &workExperience, "responsibility")
-
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if len(workExperience.Responsibilities) < 1 {
-			t.Fatalf("expected %d, received %d", 1, len(workExperience.Responsibilities))
-		} else if workExperience.Responsibilities[0].Id != responsibility.Id {
-			t.Fatalf("expected %s, received %s", responsibility.Id, workExperience.Responsibilities[0].Id)
+		if workExperience.Location != w.Location {
+			t.Fatalf("expected %s, received %s", w.Location, workExperience.Location)
 		}
 	})
 }

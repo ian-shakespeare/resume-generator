@@ -3,46 +3,14 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"time"
-
-	"github.com/google/uuid"
+	"resumegenerator/pkg/resume"
 )
-
-type Resume struct {
-	Id          string    `json:"id"`
-	UserId      string    `json:"userId"`
-	Name        string    `json:"name"`
-	Email       string    `json:"email"`
-	PhoneNumber string    `json:"phoneNumber"`
-	Prelude     string    `json:"prelude"`
-	CreatedAt   time.Time `json:"createdAt"`
-	Location    *string   `json:"location"`
-	LinkedIn    *string   `json:"linkedIn"`
-	Github      *string   `json:"github"`
-	Facebook    *string   `json:"facebook"`
-	Instagram   *string   `json:"instagram"`
-	Twitter     *string   `json:"twitter"`
-	Portfolio   *string   `json:"portfolio"`
-}
 
 func CreateResume(
 	db VersionedDatabase,
-	user *User,
-	name string,
-	email string,
-	phoneNumber string,
-	prelude string,
-	location *string,
-	linkedIn *string,
-	github *string,
-	facebook *string,
-	instagram *string,
-	twitter *string,
-	portfolio *string,
-) (Resume, error) {
-	id := uuid.New().String()
-	createdAt := time.Now()
-
+	u *User,
+	r *resume.Resume,
+) error {
 	query := `
 INSERT INTO resumes (
   resume_id,
@@ -68,36 +36,37 @@ INSERT INTO resumes (
 )
   `
 
-	result, err := db.DB().Exec(query, id, user.Id, name, email, phoneNumber, prelude, location, linkedIn, github, facebook, instagram, twitter, portfolio, createdAt.Unix())
+	result, err := db.DB().Exec(
+		query,
+		r.Id,
+		u.Id,
+		r.Name,
+		r.Email,
+		r.PhoneNumber,
+		r.Prelude,
+		strToStrPtr(r.Location),
+		strToStrPtr(r.LinkedIn),
+		strToStrPtr(r.Github),
+		strToStrPtr(r.Facebook),
+		strToStrPtr(r.Instagram),
+		strToStrPtr(r.Twitter),
+		strToStrPtr(r.Portfolio),
+		r.CreatedAt.Unix(),
+	)
 	if err != nil {
-		return Resume{}, err
+		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return Resume{}, err
+		return err
 	} else if rowsAffected != 1 {
-		return Resume{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
+		return fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
-	return Resume{
-		Id:          id,
-		UserId:      user.Id,
-		Name:        name,
-		Email:       email,
-		PhoneNumber: phoneNumber,
-		Prelude:     prelude,
-		Location:    location,
-		LinkedIn:    linkedIn,
-		Github:      github,
-		Facebook:    facebook,
-		Instagram:   instagram,
-		Twitter:     twitter,
-		Portfolio:   portfolio,
-		CreatedAt:   createdAt,
-	}, nil
+	return nil
 }
 
-func GetResume(db VersionedDatabase, id string) *Resume {
+func GetResume(db VersionedDatabase, resumeId string, userId string) *resume.Resume {
 	query := `
 SELECT
   resume_id,
@@ -115,9 +84,10 @@ SELECT
   portfolio
 FROM resumes
 WHERE resume_id = ?
+AND user_id = ?
   `
 
-	row := db.DB().QueryRow(query, id)
+	row := db.DB().QueryRow(query, resumeId, userId)
 	if row == nil {
 		return nil
 	}
@@ -130,7 +100,7 @@ WHERE resume_id = ?
 	return &resume
 }
 
-func (r *Resume) Educations(db VersionedDatabase) ([]Education, error) {
+func ResumeEducations(db VersionedDatabase, r *resume.Resume) ([]resume.Education, error) {
 	query := `
 SELECT
   education_id,
@@ -158,7 +128,7 @@ WHERE resume_id = ?
 	return educations, err
 }
 
-func (r *Resume) WorkExperiences(db VersionedDatabase) ([]WorkExperience, error) {
+func ResumeWorkExperiences(db VersionedDatabase, r *resume.Resume) ([]resume.WorkExperience, error) {
 	query := `
 SELECT
   we.work_experience_id,
@@ -187,7 +157,7 @@ WHERE we.resume_id = ?
 	return workExperiences, err
 }
 
-func (r *Resume) Projects(db VersionedDatabase) ([]Project, error) {
+func ResumeProjects(db VersionedDatabase, r *resume.Resume) ([]resume.Project, error) {
 	query := `
 SELECT
   p.project_id,
@@ -213,25 +183,52 @@ WHERE p.resume_id = ?
 	return projects, err
 }
 
-func rowToResume(row *sql.Row) (Resume, error) {
-	var resume Resume
+func rowToResume(row *sql.Row) (resume.Resume, error) {
+	var r struct {
+		Id          string
+		UserId      string
+		Name        string
+		Email       string
+		PhoneNumber string
+		Prelude     string
+		Location    *string
+		LinkedIn    *string
+		Github      *string
+		Facebook    *string
+		Instagram   *string
+		Twitter     *string
+		Portfolio   *string
+	}
 	if err := row.Scan(
-		&resume.Id,
-		&resume.UserId,
-		&resume.Name,
-		&resume.Email,
-		&resume.PhoneNumber,
-		&resume.Prelude,
-		&resume.Location,
-		&resume.LinkedIn,
-		&resume.Github,
-		&resume.Facebook,
-		&resume.Instagram,
-		&resume.Twitter,
-		&resume.Portfolio,
+		&r.Id,
+		&r.UserId,
+		&r.Name,
+		&r.Email,
+		&r.PhoneNumber,
+		&r.Prelude,
+		&r.Location,
+		&r.LinkedIn,
+		&r.Github,
+		&r.Facebook,
+		&r.Instagram,
+		&r.Twitter,
+		&r.Portfolio,
 	); err != nil {
-		return Resume{}, nil
+		return resume.Resume{}, nil
 	}
 
-	return resume, nil
+	return resume.Resume{
+		Id:          r.Id,
+		Name:        r.Name,
+		Email:       r.Email,
+		PhoneNumber: r.PhoneNumber,
+		Prelude:     r.Prelude,
+		Location:    strPtrToStr(r.Location),
+		LinkedIn:    strPtrToStr(r.LinkedIn),
+		Github:      strPtrToStr(r.Github),
+		Facebook:    strPtrToStr(r.Facebook),
+		Instagram:   strPtrToStr(r.Instagram),
+		Twitter:     strPtrToStr(r.Twitter),
+		Portfolio:   strPtrToStr(r.Portfolio),
+	}, nil
 }

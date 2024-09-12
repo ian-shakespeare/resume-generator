@@ -3,40 +3,15 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"resumegenerator/pkg/resume"
 	"time"
-
-	"github.com/google/uuid"
 )
-
-type Education struct {
-	Id           string     `json:"id"`
-	ResumeId     string     `json:"resumeId"`
-	DegreeType   string     `json:"degreeType"`
-	FieldOfStudy string     `json:"fieldOfStudy"`
-	Institution  string     `json:"institution"`
-	Began        time.Time  `json:"began"`
-	Current      bool       `json:"current"`
-	CreatedAt    time.Time  `json:"createdAt"`
-	Location     *string    `json:"location"`
-	Finished     *time.Time `json:"finished"`
-	GPA          *string    `json:"gpa"`
-}
 
 func CreateEducation(
 	db VersionedDatabase,
-	resume *Resume,
-	degreeType string,
-	fieldOfStudy string,
-	institution string,
-	began time.Time,
-	current bool,
-	location *string,
-	finished *time.Time,
-	gpa *string,
-) (Education, error) {
-	id := uuid.New().String()
-	createdAt := time.Now()
-
+	r *resume.Resume,
+	e *resume.Education,
+) error {
 	query := `
 INSERT INTO educations (
   education_id,
@@ -59,58 +34,40 @@ INSERT INTO educations (
   `
 
 	currentInt := 0
-	if current {
+	if e.Current {
 		currentInt = 1
-	}
-
-	var finishedInt *int64
-	if finished != nil {
-		val := finished.Unix()
-		finishedInt = &val
 	}
 
 	result, err := db.DB().Exec(
 		query,
-		id,
-		resume.Id,
-		degreeType,
-		fieldOfStudy,
-		institution,
-		began.Unix(),
+		e.Id,
+		r.Id,
+		e.DegreeType,
+		e.FieldOfStudy,
+		e.Institution,
+		e.Began.Unix(),
 		currentInt,
-		createdAt.Unix(),
-		location,
-		finishedInt,
-		gpa,
+		e.CreatedAt.Unix(),
+		strToStrPtr(e.Location),
+		timePtrToIntPtr(e.Finished),
+		strToStrPtr(e.GPA),
 	)
 
 	if err != nil {
-		return Education{}, err
+		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return Education{}, err
+		return err
 	} else if rowsAffected != 1 {
-		return Education{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
+		return fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
 	}
 
-	return Education{
-		Id:           id,
-		ResumeId:     resume.Id,
-		DegreeType:   degreeType,
-		FieldOfStudy: fieldOfStudy,
-		Institution:  institution,
-		Began:        began,
-		Current:      current,
-		CreatedAt:    createdAt,
-		Location:     location,
-		Finished:     finished,
-		GPA:          gpa,
-	}, nil
+	return nil
 }
 
-func GetEducation(db VersionedDatabase, id string) *Education {
+func GetEducation(db VersionedDatabase, id string) *resume.Education {
 	query := `
 SELECT
   education_id,
@@ -128,81 +85,28 @@ FROM educations
 WHERE education_id = ?
   `
 
-	row := db.DB().QueryRow(query, id)
-	if row == nil {
-		return nil
-	}
-
-	education, err := rowToEducation(row)
+	rows, err := db.DB().Query(query, id)
 	if err != nil {
 		return nil
 	}
 
-	return &education
+	e, err := rowsToEducation(rows)
+	if err != nil {
+		return nil
+	}
+
+	if len(e) < 1 {
+		return nil
+	}
+
+	return &e[0]
 }
 
-func rowToEducation(row *sql.Row) (Education, error) {
-	var education struct {
-		Id           string
-		ResumeId     string
-		DegreeType   string
-		FieldOfStudy string
-		Institution  string
-		Began        int64
-		Current      int
-		CreatedAt    int64
-		Location     *string
-		Finished     *int64
-		GPA          *string
-	}
-	if err := row.Scan(
-		&education.Id,
-		&education.ResumeId,
-		&education.DegreeType,
-		&education.FieldOfStudy,
-		&education.Institution,
-		&education.Began,
-		&education.Current,
-		&education.CreatedAt,
-		&education.Location,
-		&education.Finished,
-		&education.GPA,
-	); err != nil {
-		return Education{}, err
-	}
-
-	began := time.Unix(education.Began, 0)
-	current := false
-	if education.Current != 0 {
-		current = true
-	}
-	createdAt := time.Unix(education.CreatedAt, 0)
-	var finished *time.Time
-	if education.Finished != nil {
-		val := time.Unix(*education.Finished, 0)
-		finished = &val
-	}
-
-	return Education{
-		Id:           education.Id,
-		ResumeId:     education.ResumeId,
-		DegreeType:   education.DegreeType,
-		FieldOfStudy: education.FieldOfStudy,
-		Institution:  education.Institution,
-		Began:        began,
-		Current:      current,
-		CreatedAt:    createdAt,
-		Location:     education.Location,
-		Finished:     finished,
-		GPA:          education.GPA,
-	}, nil
-}
-
-func rowsToEducation(rows *sql.Rows) ([]Education, error) {
-	educations := make([]Education, 0)
+func rowsToEducation(rows *sql.Rows) ([]resume.Education, error) {
+	educations := make([]resume.Education, 0)
 
 	for rows.Next() {
-		var education struct {
+		var stored struct {
 			Id           string
 			ResumeId     string
 			DegreeType   string
@@ -216,44 +120,45 @@ func rowsToEducation(rows *sql.Rows) ([]Education, error) {
 			GPA          *string
 		}
 		if err := rows.Scan(
-			&education.Id,
-			&education.ResumeId,
-			&education.DegreeType,
-			&education.FieldOfStudy,
-			&education.Institution,
-			&education.Began,
-			&education.Current,
-			&education.CreatedAt,
-			&education.Location,
-			&education.Finished,
-			&education.GPA,
+			&stored.Id,
+			&stored.ResumeId,
+			&stored.DegreeType,
+			&stored.FieldOfStudy,
+			&stored.Institution,
+			&stored.Began,
+			&stored.Current,
+			&stored.CreatedAt,
+			&stored.Location,
+			&stored.Finished,
+			&stored.GPA,
 		); err != nil {
 			return nil, err
 		}
 
-		began := time.Unix(education.Began, 0)
+		// TODO: Resume id
+
+		began := time.Unix(stored.Began, 0)
 		current := false
-		if education.Current != 0 {
+		if stored.Current != 0 {
 			current = true
 		}
-		createdAt := time.Unix(education.CreatedAt, 0)
+		createdAt := time.Unix(stored.CreatedAt, 0)
 		var finished *time.Time
-		if education.Finished != nil {
-			val := time.Unix(*education.Finished, 0)
+		if stored.Finished != nil {
+			val := time.Unix(*stored.Finished, 0)
 			finished = &val
 		}
-		educations = append(educations, Education{
-			Id:           education.Id,
-			ResumeId:     education.ResumeId,
-			DegreeType:   education.DegreeType,
-			FieldOfStudy: education.FieldOfStudy,
-			Institution:  education.Institution,
+		educations = append(educations, resume.Education{
+			Id:           stored.Id,
+			DegreeType:   stored.DegreeType,
+			FieldOfStudy: stored.FieldOfStudy,
+			Institution:  stored.Institution,
 			Began:        began,
 			Current:      current,
 			CreatedAt:    createdAt,
-			Location:     education.Location,
+			Location:     strPtrToStr(stored.Location),
 			Finished:     finished,
-			GPA:          education.GPA,
+			GPA:          strPtrToStr(stored.GPA),
 		})
 	}
 
