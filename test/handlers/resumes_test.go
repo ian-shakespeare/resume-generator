@@ -246,7 +246,7 @@ func TestHandleGetResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -283,7 +283,7 @@ func TestHandleGetResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}

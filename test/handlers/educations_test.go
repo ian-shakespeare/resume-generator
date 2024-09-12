@@ -78,7 +78,7 @@ func TestHandleCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -111,7 +111,7 @@ func TestHandleCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -168,7 +168,7 @@ func TestHandleCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -279,7 +279,7 @@ func TestHandleGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -323,7 +323,7 @@ func TestHandleGetEducation(t *testing.T) {
 		}
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -334,7 +334,7 @@ func TestHandleGetEducation(t *testing.T) {
 		}
 		r.SetPathValue("resumeId", res.Id)
 
-		e, err := resume.EducationFromJSON([]byte(test.MIN_EDUCATION))
+		e, err := resume.NewEducation([]byte(test.MIN_EDUCATION))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}

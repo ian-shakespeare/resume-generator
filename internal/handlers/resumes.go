@@ -35,7 +35,7 @@ func HandleCreateResume(w http.ResponseWriter, r *http.Request, a *auth.Auth, db
 		return
 	}
 
-	newResume, err := resume.FromJSON(body)
+	newResume, err := resume.New(body)
 	if err != nil {
 		http.Error(w, "bad request", 400)
 		return

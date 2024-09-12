@@ -22,7 +22,7 @@ func TestCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		r, err := resume.New([]byte(test.FULL_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -36,7 +36,7 @@ func TestCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		w, err := resume.NewWorkExperience([]byte(test.MIN_WORK_EXPERIENCE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -61,12 +61,12 @@ func TestCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		r, err := resume.New([]byte(test.FULL_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w, err := resume.WorkExperienceFromJSON([]byte(test.FULL_WORK_EXPERIENCE))
+		w, err := resume.NewWorkExperience([]byte(test.FULL_WORK_EXPERIENCE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -96,12 +96,12 @@ func TestGetWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		w, err := resume.NewWorkExperience([]byte(test.MIN_WORK_EXPERIENCE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -135,12 +135,12 @@ func TestGetWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		w, err := resume.NewWorkExperience([]byte(test.MIN_WORK_EXPERIENCE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}

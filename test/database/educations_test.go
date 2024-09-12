@@ -22,7 +22,7 @@ func TestCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -32,7 +32,7 @@ func TestCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		e, err := resume.EducationFromJSON([]byte(test.MIN_EDUCATION))
+		e, err := resume.NewEducation([]byte(test.MIN_EDUCATION))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -58,7 +58,7 @@ func TestCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		r, err := resume.New([]byte(test.FULL_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -68,7 +68,7 @@ func TestCreateEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		e, err := resume.EducationFromJSON([]byte(test.FULL_EDUCATION))
+		e, err := resume.NewEducation([]byte(test.FULL_EDUCATION))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -96,7 +96,7 @@ func TestGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -106,7 +106,7 @@ func TestGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		e, err := resume.EducationFromJSON([]byte(test.MIN_EDUCATION))
+		e, err := resume.NewEducation([]byte(test.MIN_EDUCATION))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -141,7 +141,7 @@ func TestGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		r, err := resume.New([]byte(test.FULL_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -151,7 +151,7 @@ func TestGetEducation(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		e, err := resume.EducationFromJSON([]byte(test.FULL_EDUCATION))
+		e, err := resume.NewEducation([]byte(test.FULL_EDUCATION))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}

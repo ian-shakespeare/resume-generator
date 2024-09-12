@@ -22,7 +22,7 @@ func TestCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -52,7 +52,7 @@ func TestCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		r, err := resume.New([]byte(test.FULL_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -84,7 +84,7 @@ func TestGetResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -119,7 +119,7 @@ func TestGetResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		r, err := resume.New([]byte(test.FULL_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -156,7 +156,7 @@ func TestResumeGetEducations(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -189,7 +189,7 @@ func TestResumeGetEducations(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -199,7 +199,7 @@ func TestResumeGetEducations(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		e, err := resume.EducationFromJSON([]byte(test.MIN_EDUCATION))
+		e, err := resume.NewEducation([]byte(test.MIN_EDUCATION))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -240,7 +240,7 @@ func TestResumeGetWorkExperiences(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -274,7 +274,7 @@ func TestResumeGetWorkExperiences(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -284,7 +284,7 @@ func TestResumeGetWorkExperiences(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		w, err := resume.NewWorkExperience([]byte(test.MIN_WORK_EXPERIENCE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -325,7 +325,7 @@ func TestResumeGetProjects(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -359,7 +359,7 @@ func TestResumeGetProjects(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -369,7 +369,7 @@ func TestResumeGetProjects(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		p, err := resume.ProjectFromJSON([]byte(test.PROJECT))
+		p, err := resume.NewProject([]byte(test.PROJECT))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}

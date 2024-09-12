@@ -19,7 +19,7 @@ type WorkExperience struct {
 	Location         string     `json:"location"`
 }
 
-func WorkExperienceFromJSON(b []byte) (WorkExperience, error) {
+func NewWorkExperience(b []byte) (WorkExperience, error) {
 	var w struct {
 		Employer         string   `json:"employer"`
 		Title            string   `json:"title"`

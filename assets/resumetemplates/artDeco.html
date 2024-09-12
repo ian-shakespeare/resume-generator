@@ -13,114 +13,91 @@
   </head>
   <body>
     <header>
-      <h1>Ian Shakespeare</h1>
-      <h2>Backend Developer</h2>
+      <h1>{{.Name}}</h1>
+      <h2>{{.Title}}</h2>
     </header>
     <main>
       <aside>
         <section id="contact">
           <h3>Contact</h3>
           <ul>
-            <li>ian@shakespeare.dev</li>
-            <li>+1 (000) 000-0000</li>
-            <li>Saint George, UT</li>
-            <li>ian-shakespeare-abb990197</li>
-            <li>ian-shakespeare</li>
-            <li>shakespeare.dev</li>
+            <li>{{.Email}}</li>
+            <li>{{.PhoneNumber}}</li>
+            {{if .Location}}
+              <li>{{.Location}}</li>
+            {{end}}
+            {{if .LinkedIn}}
+              <li>{{.LinkedIn}}</li>
+            {{end}}
+            {{if .Github}}
+              <li>{{.Github}}</li>
+            {{end}}
+            {{if .Portfolio}}
+              <li>{{.Portfolio}}</li>
+            {{end}}
           </ul>
         </section>
         <section id="education">
           <h3>Education</h3>
-          <p>B.S.</p>
-          <p>Computer Science</p>
-          <p>Utah Tech University</p>
-          <p>August 2019 - May 2023</p>
-          <p>Saint George, UT</p>
-          <p>3.7/4.0</p>
+          {{range .Educations}}
+            <p>{{.DegreeType}}</p>
+            <p>{{.FieldOfStudy}}</p>
+            <p>{{.Institute}}</p>
+            <p>
+              {{month_year .Began}} -
+              {{if .Current}}
+                Present
+              {{else}}
+                {{month_year .Finished}}
+              {{end}}
+            </p>
+            {{if .Location}}
+              <p>{{.Location}}</p>
+            {{end}}
+            {{if .GPA}}
+              <p>{{.GPA}}</p>
+            {{end}}
+          {{end}}
         </section>
       </aside>
       <section id="work-experience">
         <h3>Work Experience</h3>
-        <section>
-          <h4>Principal App Developer</h4>
-          <h5>Wilson Electronics, LLC.</h5>
-          <p>June 2024 - current / Saint George, UT</p>
-          <ul>
-            <li>
-              Generate user stories for, collect and monitor UX analytics on
-              consumer facing mobile applications with more that one-hundred
-              thousand MAUs (monthly active users)
-            </li>
-            <li>
-              Develop high availablity, high performance authentication, file
-              syncing, and web store services
-            </li>
-            <li>
-              Review junior developer code, oversee source code merges, host
-              project reviews, write and maintain project documentation
-            </li>
-            <li>
-              Implement and maintain internal developer tools, SDKs, plugins,
-              data pipelines, corporate applications, and project management
-              systems
-            </li>
-          </ul>
-        </section>
-        <section>
-          <h4>Software Developer</h4>
-          <h5>Wilson Electronics, LLC.</h5>
-          <p>August 2022 - June 2024 / Saint George, UT</p>
-          <ul>
-            <li>
-              Develop, deploy, and optimize multi-national consumer facing web
-              storefronts with tens of thousands of MAUs (monthly active users)
-            </li>
-            <li>
-              Maintain legacy mobile applications and implement replacements for
-              deprecated packages and services
-            </li>
-            <li>
-              Manage continuous integration and continuous delivery pipelines
-              using Git, GitHub Actions, automated testing, Heroku, and Vercel
-            </li>
-          </ul>
-        </section>
-        <section>
-          <h4>Computer Science Teaching Assistant</h4>
-          <h5>Utah Tech University</h5>
-          <p>January 2022 - December 2022 / Saint George, UT</p>
-          <ul>
-            <li>Assist teaching staff with assignment grading</li>
-            <li>Tutor computer science students of all levels</li>
-          </ul>
-        </section>
+        {{range .WorkExperiences}}
+          <section>
+            <h4>{{.Title}}</h4>
+            <h5>{{.Employer}}</h5>
+            <p>
+              {{month_year .Began}} -
+              {{if .Current}}
+                Present
+              {{else}}
+                {{month_year .Finished}}
+              {{end}}
+              {{if .Location}}
+                / {{.Location}}
+              {{end}}
+            </p>
+            <ul>
+              {{range .Responsibilities}}
+                <li>{{.}}</li>
+              {{end}}
+            </ul>
+          </section>
+        {{end}}
       </section>
       <section id="projects">
         <h3>Projects</h3>
-        <section>
-          <h4>Caravanner</h4>
-          <h5>Co-creator</h5>
-          <ul>
-            <li>
-              Built a cross-platform mobile app for travel oriented event
-              scheduling and group messaging
-            </li>
-            <li>
-              Implement real-time messaging with Web Sockets and PostgreSQL
-            </li>
-          </ul>
-        </section>
-        <section>
-          <h4>FlightOwl</h4>
-          <h5>Creator</h5>
-          <ul>
-            <li>
-              Built a multi-platform flight search engine and price tracker
-              using SvelteKit & Go
-            </li>
-            <li>Utilized React Native to create a mobile interface</li>
-          </ul>
-        </section>
+        {{range .Projects}}
+          <section>
+            <h4>{{.Name}}</h4>
+            <h5>{{.Role}}</h5>
+            <ul>
+              {{range .Responsibilities}}
+                <li>{{.}}</li>
+              {{end}}
+            </ul>
+          </section>
+        {{end}}
       </section>
     </main>
   </body>

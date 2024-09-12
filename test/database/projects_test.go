@@ -22,7 +22,7 @@ func TestCreateProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -32,7 +32,7 @@ func TestCreateProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		p, err := resume.ProjectFromJSON([]byte(test.PROJECT))
+		p, err := resume.NewProject([]byte(test.PROJECT))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -60,7 +60,7 @@ func TestGetProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -70,7 +70,7 @@ func TestGetProject(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		p, err := resume.ProjectFromJSON([]byte(test.PROJECT))
+		p, err := resume.NewProject([]byte(test.PROJECT))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}

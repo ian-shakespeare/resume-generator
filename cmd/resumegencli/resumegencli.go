@@ -1,0 +1,4 @@
+package resumegencli
+
+func main() {
+}

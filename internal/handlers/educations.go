@@ -40,7 +40,7 @@ func HandleCreateEducation(w http.ResponseWriter, r *http.Request, a *auth.Auth,
 		return
 	}
 
-	e, err := resume.EducationFromJSON(body)
+	e, err := resume.NewEducation(body)
 	if err != nil {
 		http.Error(w, "bad request", 400)
 		return

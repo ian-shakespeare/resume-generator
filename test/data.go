@@ -27,7 +27,7 @@ const MIN_EDUCATION string = `{
   "institution": "institution",
   "began": "1970-01-01T00:00:00.000Z",
   "current": true,
-  "gpa": "string"
+  "gpa": "gpa"
 }`
 
 const FULL_EDUCATION string = `{
@@ -38,7 +38,7 @@ const FULL_EDUCATION string = `{
   "current": true,
   "location": "location",
   "finished": "1970-01-01T00:00:00.000Z",
-  "gpa": "string"
+  "gpa": "gpa"
 }`
 
 const MIN_WORK_EXPERIENCE string = `{
@@ -47,7 +47,7 @@ const MIN_WORK_EXPERIENCE string = `{
   "began": "1970-01-01T00:00:00.000Z",
   "current": true,
   "responsibilities": [
-    "string"
+    "responsibility"
   ]
 }`
 
@@ -59,7 +59,7 @@ const FULL_WORK_EXPERIENCE string = `{
   "location": "location",
   "finished": "1970-01-01T00:00:00.000Z",
   "responsibilities": [
-    "string"
+    "responsibility"
   ]
 }`
 

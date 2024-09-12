@@ -45,7 +45,7 @@ func HandleCreateProject(w http.ResponseWriter, r *http.Request, a *auth.Auth, d
 		return
 	}
 
-	p, err := resume.ProjectFromJSON(body)
+	p, err := resume.NewProject(body)
 	if err != nil {
 		http.Error(w, "bad request", 400)
 		return

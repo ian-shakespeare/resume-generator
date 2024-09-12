@@ -100,7 +100,7 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -134,7 +134,7 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -196,7 +196,7 @@ func TestHandleCreateWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -332,7 +332,7 @@ func TestHandleGetWorkExperience(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -378,7 +378,7 @@ func TestHandleGetWorkExperience(t *testing.T) {
 		}
 		r.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
 
-		res, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		res, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -389,7 +389,7 @@ func TestHandleGetWorkExperience(t *testing.T) {
 		}
 		r.SetPathValue("resumeId", res.Id)
 
-		we, err := resume.WorkExperienceFromJSON([]byte(test.MIN_WORK_EXPERIENCE))
+		we, err := resume.NewWorkExperience([]byte(test.MIN_WORK_EXPERIENCE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}

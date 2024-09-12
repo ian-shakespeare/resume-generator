@@ -20,7 +20,7 @@ type Education struct {
 	GPA          string     `json:"gpa"`
 }
 
-func EducationFromJSON(b []byte) (Education, error) {
+func NewEducation(b []byte) (Education, error) {
 	var e struct {
 		DegreeType   string `json:"degreeType"`
 		FieldOfStudy string `json:"fieldOfStudy"`

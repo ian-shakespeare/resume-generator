@@ -11,6 +11,7 @@ type Resume struct {
 	Id              string           `json:"id"`
 	CreatedAt       time.Time        `json:"createdAt"`
 	Name            string           `json:"name"`
+	Title           string           `json:"title"`
 	Email           string           `json:"email"`
 	PhoneNumber     string           `json:"phoneNumber"`
 	Prelude         string           `json:"prelude"`
@@ -26,9 +27,10 @@ type Resume struct {
 	Projects        []Project        `json:"projects"`
 }
 
-func FromJSON(b []byte) (Resume, error) {
+func New(b []byte) (Resume, error) {
 	var r struct {
 		Name        string `json:"name"`
+		Title       string `json:"title"`
 		Email       string `json:"email"`
 		PhoneNumber string `json:"phoneNumber"`
 		Prelude     string `json:"prelude"`
@@ -51,6 +53,7 @@ func FromJSON(b []byte) (Resume, error) {
 		Id:          id,
 		CreatedAt:   now,
 		Name:        r.Name,
+		Title:       r.Title,
 		Email:       r.Email,
 		PhoneNumber: r.PhoneNumber,
 		Prelude:     r.Prelude,

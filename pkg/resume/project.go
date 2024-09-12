@@ -16,7 +16,7 @@ type Project struct {
 	Responsibilities []string  `json:"responsibilities"`
 }
 
-func ProjectFromJSON(b []byte) (Project, error) {
+func NewProject(b []byte) (Project, error) {
 	var p struct {
 		Name             string   `json:"name"`
 		Description      string   `json:"description"`

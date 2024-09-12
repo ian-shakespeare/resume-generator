@@ -9,8 +9,8 @@ import (
 
 const TEST_TEMPLATE string = `<html>
 <p>{{.Name}}{{.Email}}{{.PhoneNumber}}{{.Location}}{{.LinkedIn}}{{.Github}}{{.Facebook}}{{.Instagram}}{{.Twitter}}{{.Portfolio}}</p>
-{{range .Educations}}<section>{{.DegreeType}}{{.FieldOfStudy}}{{.Institution}}{{.Timeframe.Began}}{{if .Timeframe.Current}}current{{end}}{{.Timeframe.Finished}}{{.Location}}{{.GPA}}</section>{{end}}
-{{range .WorkExperiences}}<section>{{.Employer}}{{.Role}}{{.Timeframe.Began}}{{if .Timeframe.Current}}current{{end}}{{.Timeframe.Finished}}{{.Location}}<ul>{{range .Responsibilities}}<li>{{.}}</li>{{end}}</ul></section>{{end}}
+{{range .Educations}}<section>{{.DegreeType}}{{.FieldOfStudy}}{{.Institution}}{{month_year .Began}}{{if .Current}}current{{end}}{{month_year .Finished}}{{.Location}}{{.GPA}}</section>{{end}}
+{{range .WorkExperiences}}<section>{{.Employer}}{{.Title}}{{month_year .Began}}{{if .Current}}current{{end}}{{month_year .Finished}}{{.Location}}<ul>{{range .Responsibilities}}<li>{{.}}</li>{{end}}</ul></section>{{end}}
 {{range .Projects}}<section>{{.Name}}{{.Role}}<ul>{{range .Responsibilities}}<li>{{.}}</li>{{end}}</ul></section>{{end}}
 </html>`
 
@@ -23,7 +23,7 @@ func TestGenerateHtml(t *testing.T) {
 
 </html>`
 
-		r, err := resume.FromJSON([]byte(test.MIN_RESUME))
+		r, err := resume.New([]byte(test.MIN_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -39,22 +39,22 @@ func TestGenerateHtml(t *testing.T) {
 	})
 
 	t.Run("allFields", func(t *testing.T) {
-		r, err := resume.FromJSON([]byte(test.FULL_RESUME))
+		r, err := resume.New([]byte(test.FULL_RESUME))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		e, err := resume.EducationFromJSON([]byte(test.FULL_EDUCATION))
+		e, err := resume.NewEducation([]byte(test.FULL_EDUCATION))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		w, err := resume.WorkExperienceFromJSON([]byte(test.FULL_WORK_EXPERIENCE))
+		w, err := resume.NewWorkExperience([]byte(test.FULL_WORK_EXPERIENCE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		p, err := resume.ProjectFromJSON([]byte(test.PROJECT))
+		p, err := resume.NewProject([]byte(test.PROJECT))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -65,8 +65,8 @@ func TestGenerateHtml(t *testing.T) {
 
 		expected := `<html>
 <p>nameemailphoneNumberlocationlinkedIngithubfacebookinstagramtwitterportfolio</p>
-<section>degreefieldOfStudyinstitutionJanuary 1970currentlocationgpa</section>
-<section>employerroleJanuary 1970currentlocation<ul><li>responsibility</li></ul></section>
+<section>degreeTypefieldOfStudyinstitutionJanuary 1970currentJanuary 1970locationgpa</section>
+<section>employertitleJanuary 1970currentJanuary 1970location<ul><li>responsibility</li></ul></section>
 <section>namerole<ul><li>responsibility</li></ul></section>
 </html>`
 

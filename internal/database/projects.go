@@ -39,7 +39,7 @@ INSERT INTO projects (
 	if err != nil {
 		return err
 	}
-	// TODO: Create project responsibility.
+
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return err

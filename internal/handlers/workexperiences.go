@@ -61,7 +61,7 @@ func HandleCreateWorkExperience(w http.ResponseWriter, r *http.Request, a *auth.
 		return
 	}
 
-	we, err := resume.WorkExperienceFromJSON(body)
+	we, err := resume.NewWorkExperience(body)
 	if err != nil {
 		http.Error(w, "bad request", 400)
 		return
