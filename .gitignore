@@ -20,6 +20,8 @@ go.work.sum
 
 # Executable
 resume-generator
+resume-gen-web
+resume-gen
 
 # OS Files
 *.DS_Store

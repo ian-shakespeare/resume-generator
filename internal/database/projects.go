@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"resumegenerator/internal/utils"
+	"resumegenerator/pkg/utils"
 	"resumegenerator/pkg/resume"
 	"time"
 )

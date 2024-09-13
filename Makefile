@@ -1,25 +1,42 @@
-BIN := resume-generator
-CMD_DIR := cmd/resumegenerator/
+CMD_DIR := ./cmd/
+
+WEB_DIR := $(CMD_DIR)resumegenweb/
+WEB_BIN := resume-gen-web
+
+CLI_DIR := $(CMD_DIR)resumegencli/
+CLI_BIN := resume-gen
+
+BUILD_CMD := go build
+DIR_FLAG := -C
+OUT_FLAG := -o
+CHMOD := chmod +x
 
 TEST_DIRS := \
 	./test/database/... \
 	./test/handlers/... \
-	./test/generator/...
+	./test/generator/... \
+	./test/cli/...
 
 all: run
 
 run:
-	go run $(CMD_DIR)*
+	echo TODO
 
-build:
-	go build -C $(CMD_DIR) -o $(BIN)
-	mv $(CMD_DIR)$(BIN) ./
+web:
+	$(BUILD_CMD) $(DIR_FLAG) $(WEB_DIR) $(OUT_FLAG) $(WEB_BIN)
+	mv $(WEB_DIR)$(WEB_BIN) ./$(WEB_BIN)
+	$(CHMOD) $(WEB_BIN)
+
+cli:
+	$(BUILD_CMD) $(DIR_FLAG) $(CLI_DIR) $(OUT_FLAG) $(CLI_BIN)
+	mv $(CLI_DIR)$(CLI_BIN) ./$(CLI_BIN)
+	$(CHMOD) $(CLI_BIN)
 
 test:
 	go test $(TEST_DIRS)
 
 clean:
 	go clean
-	rm -f $(BIN)
+	rm -f $(WEB_BIN) $(CLI_BIN)
 
-.PHONY: all build run clean test
+.PHONY: all run web cli test clean

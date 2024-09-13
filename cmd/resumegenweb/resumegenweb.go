@@ -1,4 +1,4 @@
-package resumegenweb
+package main
 
 import "fmt"
 
