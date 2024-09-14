@@ -8,8 +8,8 @@ import (
 func TestNewArgParser(t *testing.T) {
 	t.Run("duplicateName", func(t *testing.T) {
 		_, err := cli.NewArgParser([]cli.Flag{
-			{Name: "input", Markers: []string{"-o", "--output"}, Description: "", HasValue: true},
-			{Name: "input", Markers: []string{"-i", "--input"}, Description: "", HasValue: true},
+			{Name: "input", Markers: []string{"-o", "--output"}, HasValue: true},
+			{Name: "input", Markers: []string{"-i", "--input"}, HasValue: true},
 		})
 
 		if err == nil {
@@ -19,7 +19,7 @@ func TestNewArgParser(t *testing.T) {
 
 	t.Run("noMarkers", func(t *testing.T) {
 		_, err := cli.NewArgParser([]cli.Flag{
-			{Name: "input", Markers: []string{}, Description: "", HasValue: true},
+			{Name: "input", Markers: []string{}, HasValue: true},
 		})
 
 		if err == nil {
@@ -29,8 +29,8 @@ func TestNewArgParser(t *testing.T) {
 
 	t.Run("duplicateMarker", func(t *testing.T) {
 		_, err := cli.NewArgParser([]cli.Flag{
-			{Name: "output", Markers: []string{"-o", "-o"}, Description: "", HasValue: true},
-			{Name: "input", Markers: []string{"-i", "--input"}, Description: "", HasValue: true},
+			{Name: "output", Markers: []string{"-o", "-o"}, HasValue: true},
+			{Name: "input", Markers: []string{"-i", "--input"}, HasValue: true},
 		})
 
 		if err == nil {
@@ -38,8 +38,8 @@ func TestNewArgParser(t *testing.T) {
 		}
 
 		_, err = cli.NewArgParser([]cli.Flag{
-			{Name: "output", Markers: []string{"-o", "--output"}, Description: "", HasValue: true},
-			{Name: "input", Markers: []string{"-o", "--input"}, Description: "", HasValue: true},
+			{Name: "output", Markers: []string{"-o", "--output"}, HasValue: true},
+			{Name: "input", Markers: []string{"-o", "--input"}, HasValue: true},
 		})
 
 		if err == nil {
@@ -50,9 +50,9 @@ func TestNewArgParser(t *testing.T) {
 
 func TestArgParserParse(t *testing.T) {
 	p, err := cli.NewArgParser([]cli.Flag{
-		{Name: "noValue", Markers: []string{"-n", "--no-value"}, Description: "", HasValue: false},
-		{Name: "input", Markers: []string{"-i", "--input"}, Description: "", HasValue: true},
-		{Name: "output", Markers: []string{"-o", "--output"}, Description: "", HasValue: true},
+		{Name: "noValue", Markers: []string{"-n", "--no-value"}, HasValue: false},
+		{Name: "input", Markers: []string{"-i", "--input"}, HasValue: true},
+		{Name: "output", Markers: []string{"-o", "--output"}, HasValue: true},
 	})
 
 	if err != nil {
@@ -232,46 +232,6 @@ func TestArgParserParse(t *testing.T) {
 
 		if a.Positionals[1] != "pos2" {
 			t.Fatalf("expected %s, received %s", "pos2", a.Positionals[0])
-		}
-	})
-}
-
-func TestArgParserUsage(t *testing.T) {
-	t.Run("nonValueFlags", func(t *testing.T) {
-		p, err := cli.NewArgParser([]cli.Flag{
-			{Name: "output", Markers: []string{"-o", "--output"}, Description: ""},
-			{Name: "input", Markers: []string{"-i", "--input"}, Description: ""},
-		})
-
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		expected := `usage: executable [-oi]`
-
-		received := p.Usage("executable")
-
-		if expected != received {
-			t.Fatalf("expected %s, received %s", expected, received)
-		}
-	})
-
-	t.Run("valueFlags", func(t *testing.T) {
-		p, err := cli.NewArgParser([]cli.Flag{
-			{Name: "output", Markers: []string{"-o", "--output"}, Description: "", HasValue: true},
-			{Name: "input", Markers: []string{"-i", "--input"}, Description: "", HasValue: true},
-		})
-
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		expected := `usage: executable [-o output] [-i input]`
-
-		received := p.Usage("executable")
-
-		if expected != received {
-			t.Fatalf("expected %s, received %s", expected, received)
 		}
 	})
 }

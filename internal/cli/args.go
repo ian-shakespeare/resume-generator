@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"resumegenerator/pkg/utils"
-	"strings"
 )
 
 type ArgParser struct {
@@ -32,22 +31,6 @@ func NewArgParser(flags []Flag) (*ArgParser, error) {
 	}
 
 	return &ArgParser{flags}, nil
-}
-
-func (a *ArgParser) Usage(executable string, positional ...string) string {
-	s := "usage: "
-
-	s += executable
-
-	if boolFlags, exists := formatBooleanFlags(a.flags); exists {
-		s += " " + boolFlags
-	}
-
-	if stringFlags, exists := formatStringFlags(a.flags); exists {
-		s += " " + stringFlags
-	}
-
-	return strings.Trim(s, " ")
 }
 
 func (a *ArgParser) Parse(args []string) (arguments, error) {
