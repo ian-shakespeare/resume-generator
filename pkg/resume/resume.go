@@ -1,81 +1,136 @@
 package resume
 
-import (
-	"encoding/json"
-	"time"
-
-	"github.com/google/uuid"
-)
+import "time"
 
 type Resume struct {
-	Id              string           `json:"id"`
-	CreatedAt       time.Time        `json:"createdAt"`
-	Name            string           `json:"name"`
-	Title           string           `json:"title"`
-	Email           string           `json:"email"`
-	PhoneNumber     string           `json:"phoneNumber"`
-	Prelude         string           `json:"prelude"`
-	Location        string           `json:"location"`
-	LinkedIn        string           `json:"linkedIn"`
-	Github          string           `json:"github"`
-	Facebook        string           `json:"facebook"`
-	Instagram       string           `json:"instagram"`
-	Twitter         string           `json:"twitter"`
-	Portfolio       string           `json:"portfolio"`
-	Educations      []Education      `json:"educations"`
-	WorkExperiences []WorkExperience `json:"workExperiences"`
-	Projects        []Project        `json:"projects"`
+	Name            string           `json,yaml:"name"`
+	Title           string           `json,yaml:"title"`
+	Email           string           `json,yaml:"email"`
+	PhoneNumber     string           `json,yaml:"phonenumber"`
+	Prelude         string           `json,yaml:"prelude"`
+	Location        string           `json,yaml:"location"`
+	LinkedIn        string           `json,yaml:"linkedin"`
+	Github          string           `json,yaml:"github"`
+	Facebook        string           `json,yaml:"facebook"`
+	Instagram       string           `json,yaml:"instagram"`
+	Twitter         string           `json,yaml:"twitter"`
+	Portfolio       string           `json,yaml:"portfolio"`
+	Skills          []string         `json,yaml:"skills"`
+	Educations      []Education      `json,yaml:"educations"`
+	WorkExperiences []WorkExperience `json,yaml:"workexperiences"`
+	Projects        []Project        `json,yaml:"projects"`
 }
 
-func New(b []byte) (Resume, error) {
-	var r struct {
-		Name        string `json:"name"`
-		Title       string `json:"title"`
-		Email       string `json:"email"`
-		PhoneNumber string `json:"phoneNumber"`
-		Prelude     string `json:"prelude"`
-		Location    string `json:"location"`
-		LinkedIn    string `json:"linkedIn"`
-		Github      string `json:"github"`
-		Facebook    string `json:"facebook"`
-		Instagram   string `json:"instagram"`
-		Twitter     string `json:"twitter"`
-		Portfolio   string `json:"portfolio"`
-	}
-	if err := json.Unmarshal(b, &r); err != nil {
-		return Resume{}, err
-	}
-
-	id := uuid.New().String()
-	now := time.Now()
-
+func MinExample() Resume {
 	return Resume{
-		Id:          id,
-		CreatedAt:   now,
-		Name:        r.Name,
-		Title:       r.Title,
-		Email:       r.Email,
-		PhoneNumber: r.PhoneNumber,
-		Prelude:     r.Prelude,
-		Location:    r.Location,
-		LinkedIn:    r.LinkedIn,
-		Github:      r.Github,
-		Facebook:    r.Facebook,
-		Instagram:   r.Instagram,
-		Twitter:     r.Twitter,
-		Portfolio:   r.Portfolio,
-		Educations:  []Education{},
-	}, nil
+		Name:            "John Doe",
+		Title:           "Job Title",
+		Email:           "jdoe@email.com",
+		PhoneNumber:     "+1 (000) 000-0000",
+		Prelude:         "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+		Skills:          []string{},
+		Educations:      []Education{},
+		WorkExperiences: []WorkExperience{},
+		Projects:        []Project{},
+	}
 }
 
-func (r *Resume) AddEducation(e Education) {
-	r.Educations = append(r.Educations, e)
-}
-
-func (r *Resume) AddWorkExperiences(w WorkExperience) {
-	r.WorkExperiences = append(r.WorkExperiences, w)
-}
-
-func (r *Resume) AddProject(p Project) {
-	r.Projects = append(r.Projects, p)
+func Example() Resume {
+  t := time.Unix(0, 0)
+	return Resume{
+		Name:        "John Doe",
+		Title:       "Job Title",
+		Email:       "jdoe@email.com",
+		PhoneNumber: "+1 (000) 000-0000",
+		Prelude:     "Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis. Tortor eleifend nec eleifend curabitur, urna non. Aliquet dictumst sapien himenaeos habitasse taciti fames accumsan porta suscipit. Dolor consequat venenatis fusce pellentesque diam blandit a senectus.",
+		Location:    "City, State",
+		LinkedIn:    "linked-in-account",
+		Github:      "github-account",
+		Portfolio:   "portfolio-website",
+		Skills: []string{
+			"Lorem ipsum odor amet",
+			"Lorem ipsum odor amet",
+			"Lorem ipsum odor amet",
+			"Lorem ipsum odor amet",
+			"Lorem ipsum odor amet",
+			"Lorem ipsum odor amet",
+		},
+		Educations: []Education{
+			{Degree: "Degree", FieldOfStudy: "Field", Institution: "Institution", Began: t, Current: true, Location: "City, State"},
+			{Degree: "Earlier Degree", FieldOfStudy: "Field", Institution: "Institution", Began: t, Current: false, Finished: &t, Location: "City, State"},
+		},
+		WorkExperiences: []WorkExperience{
+			{
+				Employer: "Employer",
+				Title:    "Job Title",
+				Began:    t,
+				Current:  true,
+				Finished: &t,
+        Location: "City, State",
+				Responsibilities: []string{
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+				},
+			},
+			{
+				Employer: "Earlier Employer",
+				Title:    "Job Title",
+				Began:    t,
+				Current:  false,
+				Finished: &t,
+        Location: "City, State",
+				Responsibilities: []string{
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+				},
+			},
+			{
+				Employer: "Earliest Employer",
+				Title:    "Job Title",
+				Began:    t,
+				Current:  false,
+				Finished: &t,
+        Location: "City, State",
+				Responsibilities: []string{
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+				},
+			},
+		},
+		Projects: []Project{
+			{
+				Name:        "Project Name",
+				Role:        "Role",
+				Description: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+				Responsibilities: []string{
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+				},
+			},
+			{
+				Name:        "Project Name",
+				Role:        "Role",
+				Description: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+				Responsibilities: []string{
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+				},
+			},
+			{
+				Name:        "Project Name",
+				Role:        "Role",
+				Description: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+				Responsibilities: []string{
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
+				},
+			},
+		},
+	}
 }

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"io/fs"
 	"log"
 	"os"
 	"resumegenerator/internal/cli"
@@ -13,17 +13,21 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"gopkg.in/yaml.v3"
 )
 
 const CLI_VERSION string = "1.0.0"
-const CLI_HELP string = `usage: resumegen [resumepath] [-hv] [-t template]
-  ------- Listing options -------
-  -t template Set output template.
+const CLI_HELP string = `usage: resumegen [resumepath] [-ehvO] [-t template] [-o outputdir]
+  ------- Generator options -------
+  -e example    Use example data.
+  -o outputdir  Set output directory.
+  -t template   Set output template.
+  -O open       Open the output on completion.
   ------- Miscellaneous options -------
-  -v version  Print version.
-  -h help     Print usage and this help message.
+  -v version    Print version.
+  -h help       Print usage and this help message.
 `
-const TEMPLATE_DIR string = "./assets/templates"
+const TEMPLATE_DIR string = "./assets/templates/"
 
 func main() {
 	so := log.New(os.Stdout, "", 0)
@@ -33,6 +37,9 @@ func main() {
 		{Name: "version", Markers: []string{"-v", "--version"}, HasValue: false},
 		{Name: "help", Markers: []string{"-h", "--help"}, HasValue: false},
 		{Name: "template", Markers: []string{"-t", "--template"}, HasValue: true},
+		{Name: "open", Markers: []string{"-O", "--open"}, HasValue: false},
+		{Name: "outputdir", Markers: []string{"-o", "--outputdir"}, HasValue: true},
+		{Name: "example", Markers: []string{"-e", "--example"}, HasValue: false},
 	})
 	if err != nil {
 		se.Fatal(err)
@@ -51,13 +58,21 @@ func main() {
 		so.Println(CLI_VERSION)
 	}
 
-	if len(args.Positionals) < 1 {
+	_, useExampleResume := args.Flags["example"]
+
+	if !useExampleResume && len(args.Positionals) < 1 {
 		se.Fatal("missing positional argument resumepath")
 	}
 
-	r, err := getResume(args.Positionals[0])
-	if err != nil {
-		so.Fatal(err)
+	var r resume.Resume
+
+	if useExampleResume {
+		r = resume.Example()
+	} else {
+		r, err = getResume(args.Positionals[0])
+		if err != nil {
+			so.Fatal(err)
+		}
 	}
 
 	selectedTmpl, exists := args.Flags["template"]
@@ -75,16 +90,21 @@ func main() {
 		se.Fatal(err.Error())
 	}
 
-	outputDir := os.TempDir()
-	outputName := "resume-" + uuid.New().String()
+	var outputDir string
+	if outputDir, exists = args.Flags["outputdir"]; !exists {
+		outputDir = os.TempDir()
+	}
+	outputName := "resume-" + uuid.New().String() + ".html"
 	outputPath := outputDir + outputName
 
-	err = os.WriteFile(outputPath, []byte(output), 644)
+	err = os.WriteFile(outputPath, []byte(output), 0777)
 	if err != nil {
 		se.Fatal(err.Error())
 	}
 
-	cli.OpenUrl(outputPath)
+	if args.Flags["open"] == "true" {
+		cli.OpenUrl(outputPath)
+	}
 
 	so.Printf("Resume saved at %s\n", outputPath)
 }
@@ -98,7 +118,7 @@ func getResume(resumePath string) (resume.Resume, error) {
 	}
 
 	ext := resumePathParts[len(resumePathParts)-1]
-	if hasValidExt := utils.Contains(acceptedExt, ext); hasValidExt {
+	if hasValidExt := utils.Contains(acceptedExt, ext); !hasValidExt {
 		return resume.Resume{}, fmt.Errorf("invalid file extension %s", ext)
 	}
 
@@ -107,5 +127,16 @@ func getResume(resumePath string) (resume.Resume, error) {
 		return resume.Resume{}, err
 	}
 
-	return resume.New(b)
+	var r resume.Resume
+	if ext == "json" {
+		if err = json.Unmarshal(b, &r); err != nil {
+			return resume.Resume{}, err
+		}
+	} else if ext == "yaml" || ext == "yml" {
+		if err = yaml.Unmarshal(b, &r); err != nil {
+			return resume.Resume{}, err
+		}
+	}
+
+	return r, nil
 }

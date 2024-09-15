@@ -30,3 +30,6 @@ resume-gen
 .vscode
 .idea
 *.swp
+
+# Inputs
+inputs/

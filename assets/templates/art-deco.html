@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Basic</title>
-    <meta name="description" content="Basic Resume" />
+    <title>Art Deco Template</title>
+    <meta name="description" content="Art Deco Resume" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -40,9 +40,9 @@
         <section id="education">
           <h3>Education</h3>
           {{range .Educations}}
-            <p>{{.DegreeType}}</p>
+            <p>{{.Degree}}</p>
             <p>{{.FieldOfStudy}}</p>
-            <p>{{.Institute}}</p>
+            <p>{{.Institution}}</p>
             <p>
               {{month_year .Began}} -
               {{if .Current}}

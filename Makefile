@@ -12,8 +12,6 @@ OUT_FLAG := -o
 CHMOD := chmod +x
 
 TEST_DIRS := \
-	./test/database/... \
-	./test/handlers/... \
 	./test/generator/... \
 	./test/cli/...
 

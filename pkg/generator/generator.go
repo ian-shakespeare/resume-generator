@@ -5,8 +5,16 @@ import (
 	"fmt"
 	"html/template"
 	"resumegenerator/pkg/resume"
+	"strconv"
 	"time"
 )
+
+func year(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return strconv.Itoa(t.Year())
+}
 
 func monthYear(t *time.Time) string {
 	if t == nil {
@@ -17,6 +25,7 @@ func monthYear(t *time.Time) string {
 
 func GenerateHtml(r *resume.Resume, tmpl string) (string, error) {
 	t, err := template.New("tmpl").Funcs(template.FuncMap{
+		"year":       year,
 		"month_year": monthYear,
 	}).Parse(tmpl)
 	if err != nil {
