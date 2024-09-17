@@ -40,7 +40,7 @@ resumegen resumedata.yml -o outputdirectory/
 resumegen resumedata.json -o outputdirectory/
 
 # With template
-resumegen resumedata.yml -o outputdirectory/ -t path/to/template
+resumegen resumedata.yml -o outputdirectory/ -t templatename
 
 # As HTML
 resumegen resumedata.yml -o outputdirectory/ -f html
@@ -51,10 +51,10 @@ resumegen -e -o outputdirectory/
 
 ## Available Templates
 
-### Default
+### `default`
 
 ![Screenshot of the default resume template](assets/images/default-screenshot.png)
 
-### Art Deco
+### `art-deco`
 
 ![Screenshot of the art deco resume template](assets/images/art-deco-screenshot.png)
