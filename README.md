@@ -53,8 +53,8 @@ resumegen -e -o outputdirectory/
 
 ### Default
 
-![Screenshot of the default resume template](assets/images/default-screenshot)
+![Screenshot of the default resume template](assets/images/default-screenshot.png)
 
 ### Art Deco
 
-![Screenshot of the art deco resume template](assets/images/art-deco-screenshot)
+![Screenshot of the art deco resume template](assets/images/art-deco-screenshot.png)
