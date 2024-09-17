@@ -19,4 +19,20 @@ go.work.sum
 .env
 
 # Executable
-resume-generator
+resumegenerator
+resumegenweb
+resumegen
+
+# OS Files
+*.DS_Store
+
+# Editor Files
+.vscode
+.idea
+*.swp
+
+# Inputs
+inputs/
+
+# Outputs
+*.pdf

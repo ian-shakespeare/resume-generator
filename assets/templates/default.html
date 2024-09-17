@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Default Template</title>
+    <meta name="description" content="Default Resume" />
+  </head>
+  <body>
+    <header>
+      <h1>{{.Name}}</h1>
+      <ul>
+        <li>{{.Email}}</li>
+        <li>{{.PhoneNumber}}</li>
+        {{if .Location}}
+          <li>{{.Location}}</li>
+        {{end}}
+        {{if .LinkedIn}}
+          <li>
+            <a href="https://www.linkedin.com/in/{{.LinkedIn}}">LinkedIn</a>
+          </li>
+        {{end}}
+        {{if .Github}}
+          <li>
+            <a href="https://github.com/{{.Github}}">GitHub</a>
+          </li>
+        {{end}}
+      </ul>
+    </header>
+    <hr>
+    <section>
+      <p>{{.Prelude}}</p>
+    </section>
+    <hr>
+    <h2>Education</h2>
+    {{range .Educations}}
+      <section class="education">
+        <h3>{{.Institution}}</h3>
+        <p>
+          <b>
+            {{month_year .Began}} -
+            {{if .Current}}
+              Present
+            {{else}}
+              {{year .Finished}}
+            {{end}}
+          </b>
+        </p>
+        <p>{{.Degree}} in {{.FieldOfStudy}}</p>
+      </section>
+    {{end}}
+    <hr>
+    <section id="skills">
+      <h2>Strengths and Expertise</h2>
+      <ul>
+        {{range .Skills}}
+          <li>{{.}}</li>
+        {{end}}
+      </ul>
+    </section>
+    <hr>
+    <h2>Professional Experience</h2>
+    {{range .WorkExperiences}}
+      <section class="experience">
+        <div>
+          <h3>{{.Title}}</h3>
+          <p>
+            {{month_year .Began}} -
+            {{if .Current}}
+              Present
+            {{else}}
+              {{month_year .Finished}}
+            {{end}}
+          </p>
+        </div>
+        <p>{{.Employer}}</p>
+        <ul>
+          {{range .Responsibilities}}
+            <li>{{.}}</li>
+          {{end}}
+        </ul>
+      </section>
+    {{end}}
+    <hr>
+    <h2>Personal Projects</h2>
+      {{range .Projects}}
+        <section>
+          <h3>{{.Name}}</h3>
+          <p>{{.Description}}</p>
+          <ul>
+            {{range .Responsibilities}}
+              <li>{{.}}</li>
+            {{end}}
+          </ul>
+        </section>
+      {{end}}
+  </body>
+  <style>
+    @page {
+      size: auto;
+      margin: 0.75in;
+    }
+
+    * {
+      padding: 0;
+      margin: 0;
+      font-family: "Times New Roman", Times, serif;
+    }
+
+    hr {
+      margin: 1rem 0 1rem 0;
+      border-top-width: 2px;
+      border-bottom-width: 0px;
+    }
+
+    h1,
+    h2 {
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+
+    ul {
+      margin-left: 2rem;
+    }
+
+    section {
+      --padding-v: 0.25rem;
+      padding: var(--padding-v) 0 var(--padding-v) 0;
+    }
+
+    header > h1 {
+      font-size: 2.5rem;
+    }
+
+    header > ul {
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      list-style-type: none;
+    }
+
+    header > ul > li {
+      --padding-h: 0.5rem;
+      padding: 0 var(--padding-h) 0 var(--padding-h);
+      border-right-style: solid;
+      border-right-width: 1px;
+      border-right-color: black;
+    }
+
+    header > ul > li:last-child {
+      border-right-width: 0;
+    }
+
+    section > p {
+      margin: 0.125rem 0 0.125rem 0;
+    }
+
+    #skills {
+      --padding-h: 2rem;
+      padding: 0 var(--padding-h) 0 var(--padding-h);
+    }
+
+    .education {
+      display: grid;
+      grid-template-columns: 1fr auto;
+    }
+
+    .experience > div {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .experience > p, .experience > div > p {
+      font-weight: bold;
+    }
+  </style>
+</html>

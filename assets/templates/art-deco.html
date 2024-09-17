@@ -1,0 +1,264 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Art Deco Template</title>
+    <meta name="description" content="Art Deco Resume" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>{{.Name}}</h1>
+      <h2>{{.Title}}</h2>
+    </header>
+    <main>
+      <aside>
+        <section id="contact">
+          <h3>Contact</h3>
+          <ul>
+            <li>{{.Email}}</li>
+            <li>{{.PhoneNumber}}</li>
+            {{if .Location}}
+              <li>{{.Location}}</li>
+            {{end}}
+            {{if .LinkedIn}}
+              <li>{{.LinkedIn}}</li>
+            {{end}}
+            {{if .Github}}
+              <li>{{.Github}}</li>
+            {{end}}
+            {{if .Portfolio}}
+              <li>{{.Portfolio}}</li>
+            {{end}}
+          </ul>
+        </section>
+        <section id="education">
+          <h3>Education</h3>
+          {{range .Educations}}
+            <p>{{.Degree}}</p>
+            <p>{{.FieldOfStudy}}</p>
+            <p>{{.Institution}}</p>
+            <p>
+              {{month_year .Began}} -
+              {{if .Current}}
+                Present
+              {{else}}
+                {{month_year .Finished}}
+              {{end}}
+            </p>
+            {{if .Location}}
+              <p>{{.Location}}</p>
+            {{end}}
+            {{if .GPA}}
+              <p>{{.GPA}}</p>
+            {{end}}
+          {{end}}
+        </section>
+      </aside>
+      <section id="work-experience">
+        <h3>Work Experience</h3>
+        {{range .WorkExperiences}}
+          <section>
+            <h4>{{.Title}}</h4>
+            <h5>{{.Employer}}</h5>
+            <p>
+              {{month_year .Began}} -
+              {{if .Current}}
+                Present
+              {{else}}
+                {{month_year .Finished}}
+              {{end}}
+              {{if .Location}}
+                / {{.Location}}
+              {{end}}
+            </p>
+            <ul>
+              {{range .Responsibilities}}
+                <li>{{.}}</li>
+              {{end}}
+            </ul>
+          </section>
+        {{end}}
+      </section>
+      <section id="projects">
+        <h3>Projects</h3>
+        {{range .Projects}}
+          <section>
+            <h4>{{.Name}}</h4>
+            <h5>{{.Role}}</h5>
+            <ul>
+              {{range .Responsibilities}}
+                <li>{{.}}</li>
+              {{end}}
+            </ul>
+          </section>
+        {{end}}
+      </section>
+    </main>
+  </body>
+  <style>
+    @page {
+      size: auto;
+      margin: 2rem 0 2rem 0;
+    }
+
+    @page:footer {
+      display: none;
+    }
+
+    @page:header {
+      display: none;
+    }
+
+    * {
+      --amber: #fbbf24;
+      --light-gray: #f5f5f4;
+      font-family: sans-serif;
+      font-style: normal;
+      padding: 0;
+      margin: 0;
+      print-color-adjust: exact;
+    }
+
+    ul {
+      display: grid;
+      margin-left: 2.25rem;
+    }
+
+    h1 {
+      --padding-v: 0.125rem;
+      --padding-h: 3rem;
+      position: relative;
+      bottom: -1.5rem;
+      justify-self: center;
+      border-width: 1px;
+      background-color: white;
+      border-color: var(--amber);
+      border-style: solid;
+      padding: var(--padding-v) var(--padding-h) var(--padding-v)
+        var(--padding-h);
+      font-family: "Titillium Web", sans-serif;
+      text-transform: uppercase;
+      font-weight: 400;
+      font-size: 3rem;
+    }
+
+    h2 {
+      background-color: var(--light-gray);
+      padding-top: 2rem;
+      padding-bottom: 1rem;
+      font-weight: 300;
+      font-size: 1.75rem;
+      font-family: "Titillium Web", sans-serif;
+    }
+
+    h3 {
+      font-family: "Titillium Web", sans-serif;
+      text-transform: uppercase;
+      font-size: 1.375rem;
+      font-weight: 600;
+    }
+
+    h4 {
+      font-size: 1.3rem;
+      font-weight: 300;
+    }
+
+    h5 {
+      font-size: 1rem;
+      font-weight: 300;
+      margin-top: 0.25rem;
+      margin-bottom: 0.3rem;
+    }
+
+    li {
+      font-size: 0.825rem;
+      font-weight: 300;
+      line-height: 1.25;
+    }
+
+    p {
+      font-size: 1rem;
+      font-weight: 300;
+    }
+
+    header {
+      display: grid;
+      text-align: center;
+    }
+
+    main {
+      --padding-v: 2rem;
+      --padding-h: 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      grid-template-areas:
+        "aside experience"
+        "aside projects";
+      padding: var(--padding-v) var(--padding-h) var(--padding-v)
+        var(--padding-h);
+    }
+
+    aside {
+      grid-area: aside;
+      display: grid;
+      align-content: start;
+      gap: 2rem;
+      border-right-width: 2px;
+      border-right-color: var(--amber);
+      border-right-style: solid;
+      text-align: right;
+      padding-right: 1.5rem;
+    }
+
+    #contact {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    #contact > ul {
+      list-style-type: none;
+      margin-left: 0;
+      gap: 0.5rem;
+    }
+
+    #contact > ul > li {
+      line-height: 1;
+    }
+
+    #education {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    #education > p {
+      font-size: 1rem;
+    }
+
+    section > section {
+      display: grid;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    section > section > ul {
+      gap: 0.25rem;
+    }
+
+    #work-experience {
+      grid-area: experience;
+      padding-left: 1.5rem;
+    }
+
+    #projects {
+      grid-area: projects;
+      padding-left: 1.5rem;
+    }
+  </style>
+</html>
