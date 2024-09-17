@@ -17,12 +17,12 @@ import (
 )
 
 const CLI_VERSION string = "1.0.0"
-const CLI_HELP string = `usage: resumegen [resumepath] [-ehvO] [-t template] [-o outputdir]
+const CLI_HELP string = `usage: resumegen [resumepath] [-efhv] [-t template] [-o outputdir]
   ------- Generator options -------
   -e example    Use example data.
+  -f format     Set output format <html/pdf>.
   -o outputdir  Set output directory.
   -t template   Set output template.
-  -O open       Open the output on completion.
   ------- Miscellaneous options -------
   -v version    Print version.
   -h help       Print usage and this help message.
@@ -37,9 +37,9 @@ func main() {
 		{Name: "version", Markers: []string{"-v", "--version"}, HasValue: false},
 		{Name: "help", Markers: []string{"-h", "--help"}, HasValue: false},
 		{Name: "template", Markers: []string{"-t", "--template"}, HasValue: true},
-		{Name: "open", Markers: []string{"-O", "--open"}, HasValue: false},
 		{Name: "outputdir", Markers: []string{"-o", "--outputdir"}, HasValue: true},
 		{Name: "example", Markers: []string{"-e", "--example"}, HasValue: false},
+		{Name: "format", Markers: []string{"-f", "--format"}, HasValue: true},
 	})
 	if err != nil {
 		se.Fatal(err)
@@ -64,15 +64,9 @@ func main() {
 		se.Fatal("missing positional argument resumepath")
 	}
 
-	var r resume.Resume
-
-	if useExampleResume {
-		r = resume.Example()
-	} else {
-		r, err = getResume(args.Positionals[0])
-		if err != nil {
-			so.Fatal(err)
-		}
+	r, err := getResume(&args)
+	if err != nil {
+		se.Fatal(err.Error())
 	}
 
 	selectedTmpl, exists := args.Flags["template"]
@@ -85,34 +79,56 @@ func main() {
 		se.Fatal(err.Error())
 	}
 
-	output, err := generator.GenerateHtml(&r, string(tmpl))
+	var b []byte
+	if args.Flags["format"] == "html" {
+		b, err = generator.GenerateHtml(&r, tmpl)
+	} else {
+		b, err = generator.GeneratePdf(&r, tmpl)
+	}
 	if err != nil {
 		se.Fatal(err.Error())
 	}
 
-	var outputDir string
-	if outputDir, exists = args.Flags["outputdir"]; !exists {
-		outputDir = os.TempDir()
-	}
-	outputName := "resume-" + uuid.New().String() + ".html"
-	outputPath := outputDir + outputName
+	o := getOutputPath(&args)
 
-	err = os.WriteFile(outputPath, []byte(output), 0777)
+	err = os.WriteFile(o, []byte(b), 0777)
 	if err != nil {
 		se.Fatal(err.Error())
 	}
 
-	if args.Flags["open"] == "true" {
-		cli.OpenUrl(outputPath)
-	}
-
-	so.Printf("Resume saved at %s\n", outputPath)
+	so.Printf("Resume saved at %s\n", o)
 }
 
-func getResume(resumePath string) (resume.Resume, error) {
+func getOutputPath(args *cli.Arguments) string {
+	dir, exists := args.Flags["outputdir"]
+	if !exists {
+		dir = os.TempDir()
+	}
+	if dir == "." {
+		dir = ""
+	}
+
+	ext := ".pdf"
+	if args.Flags["format"] == "html" {
+		ext = ".html"
+	}
+
+	name := "resume-" + uuid.New().String()
+
+	return dir + name + ext
+}
+
+func getResume(args *cli.Arguments) (resume.Resume, error) {
+	var path string
+	if args.Flags["example"] == "true" || len(args.Positionals) < 1 {
+		return resume.Example(), nil
+	} else {
+		path = args.Positionals[0]
+	}
+
 	acceptedExt := []string{"json", "yaml", "yml"}
 
-	resumePathParts := strings.Split(resumePath, ".")
+	resumePathParts := strings.Split(path, ".")
 	if len(resumePathParts) < 1 {
 		return resume.Resume{}, errors.New("cannot identify file extension")
 	}
@@ -122,7 +138,7 @@ func getResume(resumePath string) (resume.Resume, error) {
 		return resume.Resume{}, fmt.Errorf("invalid file extension %s", ext)
 	}
 
-	b, err := os.ReadFile(resumePath)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return resume.Resume{}, err
 	}

@@ -19,9 +19,9 @@ go.work.sum
 .env
 
 # Executable
-resume-generator
-resume-gen-web
-resume-gen
+resumegenerator
+resumegenweb
+resumegen
 
 # OS Files
 *.DS_Store

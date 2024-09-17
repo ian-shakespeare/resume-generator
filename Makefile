@@ -1,10 +1,10 @@
 CMD_DIR := ./cmd/
 
 WEB_DIR := $(CMD_DIR)resumegenweb/
-WEB_BIN := resume-gen-web
+WEB_BIN := resumegenweb
 
 CLI_DIR := $(CMD_DIR)resumegencli/
-CLI_BIN := resume-gen
+CLI_BIN := resumegen
 
 BUILD_CMD := go build
 DIR_FLAG := -C

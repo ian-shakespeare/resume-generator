@@ -24,13 +24,13 @@ func TestGenerateHtml(t *testing.T) {
 
 		r := resume.MinExample()
 
-		received, err := generator.GenerateHtml(&r, TEST_TEMPLATE)
+		received, err := generator.GenerateHtml(&r, []byte(TEST_TEMPLATE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		if expected != received {
-			t.Fatalf("expected %s, received %s", expected, received)
+		if expected != string(received) {
+			t.Fatalf("expected %s, received %s", expected, string(received))
 		}
 	})
 
@@ -44,13 +44,13 @@ func TestGenerateHtml(t *testing.T) {
 <section>Project NameRole<ul><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li></ul></section><section>Project NameRole<ul><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li></ul></section><section>Project NameRole<ul><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li><li>Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.</li></ul></section>
 </html>`
 
-		received, err := generator.GenerateHtml(&r, TEST_TEMPLATE)
+		received, err := generator.GenerateHtml(&r, []byte(TEST_TEMPLATE))
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		if expected != received {
-			t.Fatalf("expected %s, received %s", expected, received)
+		if expected != string(received) {
+			t.Fatalf("expected %s, received %s", expected, string(received))
 		}
 	})
 }

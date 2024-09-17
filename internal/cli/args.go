@@ -10,6 +10,12 @@ type ArgParser struct {
 	flags []Flag
 }
 
+type Arguments struct {
+	Executable  string
+	Flags       map[string]string
+	Positionals []string
+}
+
 func NewArgParser(flags []Flag) (*ArgParser, error) {
 	existingNames := make([]string, 0)
 	existingMarkers := make([]string, 0)
@@ -33,9 +39,9 @@ func NewArgParser(flags []Flag) (*ArgParser, error) {
 	return &ArgParser{flags}, nil
 }
 
-func (a *ArgParser) Parse(args []string) (arguments, error) {
+func (a *ArgParser) Parse(args []string) (Arguments, error) {
 	if len(args) < 1 {
-		return arguments{}, errors.New("cannot process invalid arguments")
+		return Arguments{}, errors.New("cannot process invalid arguments")
 	}
 
 	executable := args[0]
@@ -46,7 +52,7 @@ func (a *ArgParser) Parse(args []string) (arguments, error) {
 	for i < len(args) {
 		arg := args[i]
 		if len(arg) < 1 {
-			return arguments{}, errors.New("cannot process empty argument")
+			return Arguments{}, errors.New("cannot process empty argument")
 		}
 
 		if isFlag(arg) {
@@ -56,7 +62,7 @@ func (a *ArgParser) Parse(args []string) (arguments, error) {
 				})
 			})
 			if flagIndex < 0 {
-				return arguments{}, fmt.Errorf("unrecognized flag %s", arg)
+				return Arguments{}, fmt.Errorf("unrecognized flag %s", arg)
 			}
 
 			flagName := a.flags[flagIndex].Name
@@ -66,16 +72,16 @@ func (a *ArgParser) Parse(args []string) (arguments, error) {
 				i += 1
 			} else {
 				if i+1 >= len(args) {
-					return arguments{}, fmt.Errorf("%s must have a value", arg)
+					return Arguments{}, fmt.Errorf("%s must have a value", arg)
 				}
 
 				nextArg := args[i+1]
 				if isFlag(nextArg) {
-					return arguments{}, fmt.Errorf("%s expected argument, received %s", arg, nextArg)
+					return Arguments{}, fmt.Errorf("%s expected argument, received %s", arg, nextArg)
 				}
 
 				if _, exists := flags[flagName]; exists {
-					return arguments{}, errors.New("redeclared flag")
+					return Arguments{}, errors.New("redeclared flag")
 				}
 
 				flags[flagName] = nextArg
@@ -87,11 +93,5 @@ func (a *ArgParser) Parse(args []string) (arguments, error) {
 		}
 	}
 
-	return arguments{Executable: executable, Flags: flags, Positionals: positionals}, nil
-}
-
-type arguments struct {
-	Executable  string
-	Flags       map[string]string
-	Positionals []string
+	return Arguments{Executable: executable, Flags: flags, Positionals: positionals}, nil
 }
