@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"resumegenerator/internal/cli"
 	"resumegenerator/pkg/generator"
 	"resumegenerator/pkg/resume"
@@ -22,16 +23,23 @@ const CLI_HELP string = `usage: resumegen [resumepath] [-efhv] [-t template] [-o
   -e example    Use example data.
   -f format     Set output format <html/pdf>.
   -o outputdir  Set output directory.
-  -t template   Set output template.
+  -t template   Path to template.
   ------- Miscellaneous options -------
   -v version    Print version.
   -h help       Print usage and this help message.
 `
-const TEMPLATE_DIR string = "./assets/templates/"
+const TEMPLATE_DIR string = "/assets/templates/"
 
 func main() {
 	so := log.New(os.Stdout, "", 0)
 	se := log.New(os.Stderr, "", 0)
+
+	ex, err := os.Executable()
+	if err != nil {
+		se.Fatal(err.Error())
+	}
+
+	dir := filepath.Dir(ex)
 
 	p, err := cli.NewArgParser([]cli.Flag{
 		{Name: "version", Markers: []string{"-v", "--version"}, HasValue: false},
@@ -74,7 +82,7 @@ func main() {
 		selectedTmpl = "default"
 	}
 
-	tmpl, err := os.ReadFile(TEMPLATE_DIR + selectedTmpl + ".html")
+	tmpl, err := os.ReadFile(dir + TEMPLATE_DIR + selectedTmpl + ".html")
 	if err != nil {
 		se.Fatal(err.Error())
 	}

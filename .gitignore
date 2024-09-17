@@ -33,3 +33,6 @@ resumegen
 
 # Inputs
 inputs/
+
+# Outputs
+*.pdf
