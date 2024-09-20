@@ -1,0 +1,88 @@
+name: John Doe
+title: Job Title
+email: jdoe@email.com
+phonenumber: +1 (000) 000-0000
+prelude: Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis. Tortor eleifend nec eleifend curabitur, urna non. Aliquet dictumst sapien himenaeos habitasse taciti fames accumsan porta suscipit. Dolor consequat venenatis fusce pellentesque diam blandit a senectus.
+location: City, State
+linkedin: in-account
+github: gh-account
+facebook: fb-account
+instagram: ins-account
+twitter: twt-account
+portfolio: portfolio-site
+skills:
+  - Lorem ipsum odor amet, consectetuer adipiscing elit
+  - Lorem ipsum odor amet, consectetuer adipiscing elit
+  - Lorem ipsum odor amet, consectetuer adipiscing elit
+  - Lorem ipsum odor amet
+  - Lorem ipsum odor amet
+  - Lorem ipsum odor amet
+educations:
+  - degree: Degree
+    fieldofstudy: Field
+    institution: Institution
+    began: 2006-08-01T00:00:00.000Z
+    current: false
+    finished: 2010-05-01T00:00:00.000Z
+    location: City, State
+    gpa: 4.0/4.0
+  - degree: Earlier Degree
+    fieldofstudy: Field
+    institution: Institution
+    began: 2002-08-01T00:00:00.000Z
+    current: false
+    finished: 2006-05-01T00:00:00.000Z
+    location: City, State
+    gpa: 4.0/4.0
+workexperiences:
+  - employer: Employer
+    title: Job Title
+    began: 2014-06-01T00:00:00.000Z
+    current: true
+    location: City, State
+    responsibilities:
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+  - employer: Earlier Employer
+    title: Job Title
+    began: 2012-01-01T00:00:00.000Z
+    current: false
+    finished: 2014-12-01T00:00:00.000Z
+    location: City, State
+    responsibilities:
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+  - employer: Earliest Employer
+    title: Job Title
+    began: 2010-01-01T00:00:00.000Z
+    current: false
+    finished: 2012-12-01T00:00:00.000Z
+    location: City, State
+    responsibilities:
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+projects:
+  - name: Project
+    description: Lorem ipsum odor amet, consectetuer adipiscing elit.
+    role: Role
+    responsibilities:
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+  - name: Earlier Project
+    description: Lorem ipsum odor amet, consectetuer adipiscing elit.
+    role: Role
+    responsibilities:
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+  - name: Earliest Project
+    description: Lorem ipsum odor amet, consectetuer adipiscing elit.
+    role: Role
+    responsibilities:
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.
+      - Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.

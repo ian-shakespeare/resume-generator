@@ -16,6 +16,7 @@ type Resume struct {
 	Twitter         string           `json,yaml:"twitter"`
 	Portfolio       string           `json,yaml:"portfolio"`
 	Skills          []string         `json,yaml:"skills"`
+	Achievements    []string         `json,yaml:"achievements"`
 	Educations      []Education      `json,yaml:"educations"`
 	WorkExperiences []WorkExperience `json,yaml:"workexperiences"`
 	Projects        []Project        `json,yaml:"projects"`
@@ -29,6 +30,7 @@ func MinExample() Resume {
 		PhoneNumber:     "+1 (000) 000-0000",
 		Prelude:         "Lorem ipsum odor amet, consectetuer adipiscing elit.",
 		Skills:          []string{},
+		Achievements:    []string{},
 		Educations:      []Education{},
 		WorkExperiences: []WorkExperience{},
 		Projects:        []Project{},
@@ -36,7 +38,7 @@ func MinExample() Resume {
 }
 
 func Example() Resume {
-  t := time.Unix(0, 0)
+	t := time.Unix(0, 0)
 	return Resume{
 		Name:        "John Doe",
 		Title:       "Job Title",
@@ -48,9 +50,17 @@ func Example() Resume {
 		Github:      "github-account",
 		Portfolio:   "portfolio-website",
 		Skills: []string{
+			"Lorem ipsum odor amet, consectetuer adipiscing elit",
+			"Lorem ipsum odor amet, consectetuer adipiscing elit",
+			"Lorem ipsum odor amet, consectetuer adipiscing elit",
 			"Lorem ipsum odor amet",
 			"Lorem ipsum odor amet",
 			"Lorem ipsum odor amet",
+		},
+		Achievements: []string{
+			"Lorem ipsum odor amet, consectetuer adipiscing elit",
+			"Lorem ipsum odor amet, consectetuer adipiscing elit",
+			"Lorem ipsum odor amet, consectetuer adipiscing elit",
 			"Lorem ipsum odor amet",
 			"Lorem ipsum odor amet",
 			"Lorem ipsum odor amet",
@@ -66,7 +76,7 @@ func Example() Resume {
 				Began:    t,
 				Current:  true,
 				Finished: &t,
-        Location: "City, State",
+				Location: "City, State",
 				Responsibilities: []string{
 					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
 					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
@@ -79,7 +89,7 @@ func Example() Resume {
 				Began:    t,
 				Current:  false,
 				Finished: &t,
-        Location: "City, State",
+				Location: "City, State",
 				Responsibilities: []string{
 					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
 					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
@@ -92,7 +102,7 @@ func Example() Resume {
 				Began:    t,
 				Current:  false,
 				Finished: &t,
-        Location: "City, State",
+				Location: "City, State",
 				Responsibilities: []string{
 					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
 					"Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis.",
