@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Default Template</title>
-    <meta name="description" content="Default Resume" />
+    <title>{{.Name}}'s Resume</title>
+    <meta name="description" content="{{.Name}}'s Resume built with Resume Generator" />
   </head>
   <body>
     <header>
@@ -45,7 +45,11 @@
             {{end}}
           </b>
         </p>
-        <p>{{.Degree}} in {{.FieldOfStudy}}</p>
+        <p>{{.Degree}} in {{.FieldOfStudy}}
+          {{if .GPA}}
+            ({{.GPA}})
+          {{end}}
+        </p>
       </section>
     {{end}}
     <hr>
@@ -82,22 +86,31 @@
     {{end}}
     <hr>
     <h2>Personal Projects</h2>
-      {{range .Projects}}
-        <section>
-          <h3>{{.Name}}</h3>
-          <p>{{.Description}}</p>
-          <ul>
-            {{range .Responsibilities}}
-              <li>{{.}}</li>
-            {{end}}
-          </ul>
-        </section>
-      {{end}}
+    {{range .Projects}}
+      <section>
+        <h3>{{.Name}}</h3>
+        <p>{{.Description}}</p>
+        <ul>
+          {{range .Responsibilities}}
+            <li>{{.}}</li>
+          {{end}}
+        </ul>
+      </section>
+    {{end}}
+    <hr>
+    <section id="achievements">
+      <h2>Certifications &amp; Awards</h2>
+      <ul>
+        {{range .Achievements}}
+          <li>{{.}}</li>
+        {{end}}
+      </ul>
+    </section>
   </body>
   <style>
     @page {
       size: auto;
-      margin: 0.75in;
+      margin: 0.5in 0.75in 0.5in 0.75in;
     }
 
     * {

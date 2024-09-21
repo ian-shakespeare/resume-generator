@@ -17,7 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const CLI_VERSION string = "1.0.0"
+const CLI_VERSION string = "1.1.0"
 const CLI_HELP string = `usage: resumegen [resumepath] [-efhv] [-t template] [-o outputdir]
   ------- Generator options -------
   -e example    Use example data.
@@ -64,6 +64,7 @@ func main() {
 
 	if args.Flags["version"] == "true" {
 		so.Println(CLI_VERSION)
+    return
 	}
 
 	_, useExampleResume := args.Flags["example"]
