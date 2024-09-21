@@ -10,7 +10,7 @@ import (
 
 const TEST_DB_NAME string = "testing.db"
 
-func SetupDB(t *testing.T) database.VersionedDatabase {
+func SetupDB(t *testing.T) database.Connection {
 	file, err := os.Create(TEST_DB_NAME)
 	if err != nil {
 		t.Fatalf("setup %s", err.Error())
@@ -25,8 +25,8 @@ func SetupDB(t *testing.T) database.VersionedDatabase {
 	return db
 }
 
-func TearDownDB(t *testing.T, db database.VersionedDatabase) {
-	db.DB().Close()
+func TearDownDB(t *testing.T, conn database.Connection) {
+	conn.Close()
 	err := os.Remove(TEST_DB_NAME)
 	if err != nil {
 		t.Fatalf("teardown %s", err.Error())

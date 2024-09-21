@@ -7,7 +7,7 @@ type Resume struct {
 	Title           string           `json,yaml:"title"`
 	Email           string           `json,yaml:"email"`
 	PhoneNumber     string           `json,yaml:"phonenumber"`
-	Prelude         string           `json,yaml:"prelude"`
+	Summary         string           `json,yaml:"summary"`
 	Location        string           `json,yaml:"location"`
 	LinkedIn        string           `json,yaml:"linkedin"`
 	Github          string           `json,yaml:"github"`
@@ -28,7 +28,7 @@ func MinExample() Resume {
 		Title:           "Job Title",
 		Email:           "jdoe@email.com",
 		PhoneNumber:     "+1 (000) 000-0000",
-		Prelude:         "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+		Summary:         "Lorem ipsum odor amet, consectetuer adipiscing elit.",
 		Skills:          []string{},
 		Achievements:    []string{},
 		Educations:      []Education{},
@@ -44,7 +44,7 @@ func Example() Resume {
 		Title:       "Job Title",
 		Email:       "jdoe@email.com",
 		PhoneNumber: "+1 (000) 000-0000",
-		Prelude:     "Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis. Tortor eleifend nec eleifend curabitur, urna non. Aliquet dictumst sapien himenaeos habitasse taciti fames accumsan porta suscipit. Dolor consequat venenatis fusce pellentesque diam blandit a senectus.",
+		Summary:     "Lorem ipsum odor amet, consectetuer adipiscing elit. Venenatis mi dignissim sem quisque iaculis. Tortor eleifend nec eleifend curabitur, urna non. Aliquet dictumst sapien himenaeos habitasse taciti fames accumsan porta suscipit. Dolor consequat venenatis fusce pellentesque diam blandit a senectus.",
 		Location:    "City, State",
 		LinkedIn:    "linked-in-account",
 		Github:      "github-account",
