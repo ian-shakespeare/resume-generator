@@ -80,7 +80,7 @@ func TestGetUser(t *testing.T) {
 	})
 }
 
-func TestCreateResume(t *testing.T) {
+func TestAddResume(t *testing.T) {
 	t.Run("minimumRequiredFields", func(t *testing.T) {
 		conn := test.SetupDB(t)
 		defer test.TearDownDB(t, conn)
@@ -95,7 +95,7 @@ func TestCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := u.CreateResume(conn, resume.MinExample())
+		r, err := u.AddResume(conn, resume.MinExample())
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -107,6 +107,10 @@ func TestCreateResume(t *testing.T) {
 
 		if !rows.Next() {
 			t.Fatalf("expected %s, received %s", "true", "false")
+		}
+
+		if len(u.Resumes) != 1 {
+			t.Fatalf("expected %d, received %d", 1, len(u.Resumes))
 		}
 	})
 
@@ -124,7 +128,7 @@ func TestCreateResume(t *testing.T) {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
 
-		r, err := u.CreateResume(conn, resume.Example())
+		r, err := u.AddResume(conn, resume.Example())
 		if err != nil {
 			t.Fatalf("expected %s, received %s", "nil", err.Error())
 		}
@@ -136,6 +140,10 @@ func TestCreateResume(t *testing.T) {
 
 		if !rows.Next() {
 			t.Fatalf("expected %s, received %s", "true", "false")
+		}
+
+		if len(u.Resumes) != 1 {
+			t.Fatalf("expected %d, received %d", 1, len(u.Resumes))
 		}
 	})
 }

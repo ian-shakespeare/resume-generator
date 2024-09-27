@@ -69,6 +69,69 @@ func GetUser(c Connection, id string) (User, error) {
 	}, nil
 }
 
-func (u *User) CreateResume(c Connection, r resume.Resume) (Resume, error) {
-	return Resume{}, nil
+func (u *User) AddResume(c Connection, r resume.Resume) (Resume, error) {
+	query := `
+  INSERT INTO resumes (
+    resume_id,
+    user_id,
+    created_at,
+    name,
+    title,
+    email,
+    phone_number,
+    summary,
+    location,
+    linkedin_username,
+    github_username,
+    facebook_username,
+    instagram_username,
+    twitter_handle,
+    portfolio
+  ) VALUES (
+    ?, ?, ?,
+    ?, ?, ?,
+    ?, ?, ?,
+    ?, ?, ?,
+    ?, ?, ?
+  )
+  `
+	id := uuid.NewString()
+	createdAt := time.Now()
+
+	result, err := c.Database().Exec(
+		query,
+		id,
+		u.Id,
+		createdAt.Unix(),
+		r.Name,
+		r.Title,
+		r.Email,
+		r.PhoneNumber,
+		r.Summary,
+		r.Location,
+		r.LinkedIn,
+		r.Github,
+		r.Facebook,
+		r.Instagram,
+		r.Twitter,
+		r.Portfolio,
+	)
+	if err != nil {
+		return Resume{}, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return Resume{}, err
+	}
+
+	if rowsAffected != 1 {
+		return Resume{}, fmt.Errorf("affected an unexpected number of rows (%d)", rowsAffected)
+	}
+
+	created := Resume{r, id, u.Id, createdAt}
+
+	u.Resumes = append(u.Resumes, created)
+
+	return created, nil
 }
