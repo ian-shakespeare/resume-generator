@@ -31,8 +31,6 @@ const CLI_HELP string = `usage: resumegen [resumepath] [-efhv] [-t template] [-o
 const TEMPLATE_DIR string = "/assets/templates/"
 
 func main() {
-	cli.PromptList(os.Stdin, os.Stdout, "List", "q")
-	return
 	so := log.New(os.Stdout, "", 0)
 	se := log.New(os.Stderr, "", 0)
 
