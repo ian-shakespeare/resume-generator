@@ -1,40 +1,27 @@
 CMD_DIR := ./cmd/
 
-WEB_DIR := $(CMD_DIR)resumegenweb/
-WEB_BIN := resumegenweb
-
-CLI_DIR := $(CMD_DIR)resumegencli/
-CLI_BIN := resumegen
-
-BUILD_CMD := go build
-DIR_FLAG := -C
-OUT_FLAG := -o
-CHMOD := chmod +x
+MAIN_FILE := resumegen.go
+BIN := resumegen
 
 TEST_DIRS := \
 	./test/generator/... \
-	./test/cli/...
+	./test/cli/... \
+	./test/assert/...
 
 all: run
 
 run:
-	echo TODO
+	@go run $(CMD_DIR)$(MAIN_FILE)
 
-web:
-	$(BUILD_CMD) $(DIR_FLAG) $(WEB_DIR) $(OUT_FLAG) $(WEB_BIN)
-	mv $(WEB_DIR)$(WEB_BIN) ./$(WEB_BIN)
-	$(CHMOD) $(WEB_BIN)
-
-cli:
-	$(BUILD_CMD) $(DIR_FLAG) $(CLI_DIR) $(OUT_FLAG) $(CLI_BIN)
-	mv $(CLI_DIR)$(CLI_BIN) ./$(CLI_BIN)
-	$(CHMOD) $(CLI_BIN)
+build:
+	@go build $(CMD_DIR)$(MAIN_FILE)
+	@chmod +x $(BIN)
 
 test:
-	go test $(TEST_DIRS)
+	@go test $(TEST_DIRS)
 
 clean:
-	go clean
-	rm -f $(WEB_BIN) $(CLI_BIN)
+	@go clean
+	@rm -f $(BIN)
 
-.PHONY: all run web cli test clean
+.PHONY: all run build test clean
