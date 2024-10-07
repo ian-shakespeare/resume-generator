@@ -3,6 +3,7 @@ package generator_test
 import (
 	"resumegenerator/pkg/generator"
 	"resumegenerator/pkg/resume"
+	"resumegenerator/test/expect"
 	"testing"
 )
 
@@ -25,13 +26,8 @@ func TestGenerateHtml(t *testing.T) {
 		r := resume.MinExample()
 
 		received, err := generator.GenerateHtml(&r, []byte(TEST_TEMPLATE))
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if expected != string(received) {
-			t.Fatalf("expected %s, received %s", expected, string(received))
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, expected, string(received))
 	})
 
 	t.Run("allFields", func(t *testing.T) {
@@ -45,12 +41,7 @@ func TestGenerateHtml(t *testing.T) {
 </html>`
 
 		received, err := generator.GenerateHtml(&r, []byte(TEST_TEMPLATE))
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if expected != string(received) {
-			t.Fatalf("expected %s, received %s", expected, string(received))
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, expected, string(received))
 	})
 }

@@ -1,4 +1,0 @@
-> Name: Ian Shakespeare
-> Title: Software Developer
-> Email: ian@shakespeare.dev
-...

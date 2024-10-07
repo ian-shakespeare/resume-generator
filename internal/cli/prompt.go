@@ -3,23 +3,18 @@ package cli
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"io"
+	"strings"
 	"time"
 )
 
-func FormatPrompt(message string) []byte {
-	leader := NewColorMessage(YELLOW, ">")
-	return []byte(fmt.Sprintf("%s %s: %s", leader, message, CYAN))
-}
-
 func Prompt(r io.Reader, w io.Writer, message string) (string, error) {
-	_, err := w.Write(FormatPrompt(message))
+	_, err := w.Write([]byte(message))
 	if err != nil {
 		return "", err
 	}
 
-	defer w.Write([]byte(RESET))
+	defer w.Write([]byte(RESET_ESCAPE_CODE))
 
 	scanner := bufio.NewScanner(r)
 
@@ -39,17 +34,15 @@ func PromptDate(r io.Reader, w io.Writer, message string) (time.Time, error) {
 	return time.Parse(time.DateOnly, s)
 }
 
-func PromptList(r io.Reader, w io.Writer, message string, exitSequence string) ([]string, error) {
-	w.Write(FormatPrompt(message))
-	w.Write([]byte("\n" + NewColorMessage(YELLOW, "> ").String() + string(CYAN)))
-	defer w.Write([]byte(RESET))
+func PromptList(r io.Reader, w io.Writer, message string, exitSequence string, lineLeader ...string) ([]string, error) {
+	w.Write([]byte(message))
 
 	scanner := bufio.NewScanner(r)
 
 	elements := []string{}
+	leader := strings.Join(lineLeader, "")
 
 	for scanner.Scan() {
-		leader := NewColorMessage(YELLOW, "> ").String() + string(CYAN)
 		w.Write([]byte(leader))
 
 		s := scanner.Text()

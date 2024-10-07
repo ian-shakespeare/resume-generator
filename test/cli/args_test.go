@@ -2,6 +2,7 @@ package cli_test
 
 import (
 	"resumegenerator/internal/cli"
+	"resumegenerator/test/expect"
 	"testing"
 )
 
@@ -12,9 +13,7 @@ func TestNewArgParser(t *testing.T) {
 			{Name: "input", Markers: []string{"-i", "--input"}, HasValue: true},
 		})
 
-		if err == nil {
-			t.Fatalf("expected %s, received %s", "error", "nil")
-		}
+		expect.Error(t, err)
 	})
 
 	t.Run("noMarkers", func(t *testing.T) {
@@ -22,9 +21,7 @@ func TestNewArgParser(t *testing.T) {
 			{Name: "input", Markers: []string{}, HasValue: true},
 		})
 
-		if err == nil {
-			t.Fatalf("expected %s, received %s", "error", "nil")
-		}
+		expect.Error(t, err)
 	})
 
 	t.Run("duplicateMarker", func(t *testing.T) {
@@ -33,18 +30,14 @@ func TestNewArgParser(t *testing.T) {
 			{Name: "input", Markers: []string{"-i", "--input"}, HasValue: true},
 		})
 
-		if err == nil {
-			t.Fatalf("expected %s, received %s", "error", "nil")
-		}
+		expect.Error(t, err)
 
 		_, err = cli.NewArgParser([]cli.Flag{
 			{Name: "output", Markers: []string{"-o", "--output"}, HasValue: true},
 			{Name: "input", Markers: []string{"-o", "--input"}, HasValue: true},
 		})
 
-		if err == nil {
-			t.Fatalf("expected %s, received %s", "error", "nil")
-		}
+		expect.Error(t, err)
 	})
 }
 
@@ -55,18 +48,14 @@ func TestArgParserParse(t *testing.T) {
 		{Name: "output", Markers: []string{"-o", "--output"}, HasValue: true},
 	})
 
-	if err != nil {
-		t.Fatalf("expected %s, received %s", "nil", err.Error())
-	}
+	expect.NilError(t, err)
 
 	t.Run("empty", func(t *testing.T) {
 		args := make([]string, 0)
 
 		_, err := p.Parse(args)
 
-		if err == nil {
-			t.Fatalf("expected %s, received %s", "error", "nil")
-		}
+		expect.Error(t, err)
 	})
 
 	t.Run("executable", func(t *testing.T) {
@@ -74,13 +63,8 @@ func TestArgParserParse(t *testing.T) {
 
 		a, err := p.Parse(args)
 
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if a.Executable != "executable" {
-			t.Fatalf("expected %s, received %s", "executable", a.Executable)
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, "executable", a.Executable)
 	})
 
 	t.Run("flagNoValue", func(t *testing.T) {
@@ -88,13 +72,8 @@ func TestArgParserParse(t *testing.T) {
 
 		a, err := p.Parse(args)
 
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if a.Flags["noValue"] != "true" {
-			t.Fatalf("expected %s, received %s", "true", a.Flags["noValue"])
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, "true", a.Flags["noValue"])
 	})
 
 	t.Run("flagExpectedValue", func(t *testing.T) {
@@ -102,9 +81,7 @@ func TestArgParserParse(t *testing.T) {
 
 		_, err := p.Parse(args)
 
-		if err == nil {
-			t.Fatalf("expected %s, received %s", "error", "nil")
-		}
+		expect.Error(t, err)
 	})
 
 	t.Run("flagToFlag", func(t *testing.T) {
@@ -112,9 +89,7 @@ func TestArgParserParse(t *testing.T) {
 
 		_, err := p.Parse(args)
 
-		if err == nil {
-			t.Fatalf("expected %s, received %s", "error", "nil")
-		}
+		expect.Error(t, err)
 	})
 
 	t.Run("redefineFlag", func(t *testing.T) {
@@ -122,9 +97,7 @@ func TestArgParserParse(t *testing.T) {
 
 		_, err := p.Parse(args)
 
-		if err == nil {
-			t.Fatalf("expected %s, received %s", "error", "nil")
-		}
+		expect.Error(t, err)
 	})
 
 	t.Run("flag", func(t *testing.T) {
@@ -132,13 +105,8 @@ func TestArgParserParse(t *testing.T) {
 
 		a, err := p.Parse(args)
 
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if a.Flags["input"] != "value" {
-			t.Fatalf("expected %s, received %s", "value", a.Flags["input"])
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, "value", a.Flags["input"])
 	})
 
 	t.Run("flagMultiple", func(t *testing.T) {
@@ -146,17 +114,9 @@ func TestArgParserParse(t *testing.T) {
 
 		a, err := p.Parse(args)
 
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if a.Flags["input"] != "in" {
-			t.Fatalf("expected %s, received %s", "in", a.Flags["input"])
-		}
-
-		if a.Flags["output"] != "out" {
-			t.Fatalf("expected %s, received %s", "out", a.Flags["output"])
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, "in", a.Flags["input"])
+		expect.Equal(t, "out", a.Flags["output"])
 	})
 
 	t.Run("positional", func(t *testing.T) {
@@ -164,13 +124,8 @@ func TestArgParserParse(t *testing.T) {
 
 		a, err := p.Parse(args)
 
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if a.Positionals[0] != "pos1" {
-			t.Fatalf("expected %s, received %s", "pos1", a.Positionals[0])
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, "pos1", a.Positionals[0])
 	})
 
 	t.Run("positionalMultiple", func(t *testing.T) {
@@ -178,17 +133,9 @@ func TestArgParserParse(t *testing.T) {
 
 		a, err := p.Parse(args)
 
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if a.Positionals[0] != "pos1" {
-			t.Fatalf("expected %s, received %s", "pos1", a.Positionals[0])
-		}
-
-		if a.Positionals[1] != "pos2" {
-			t.Fatalf("expected %s, received %s", "pos2", a.Positionals[1])
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, "pos1", a.Positionals[0])
+		expect.Equal(t, "pos2", a.Positionals[1])
 	})
 
 	t.Run("flagsAndPositional", func(t *testing.T) {
@@ -196,17 +143,9 @@ func TestArgParserParse(t *testing.T) {
 
 		a, err := p.Parse(args)
 
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if a.Flags["input"] != "value" {
-			t.Fatalf("expected %s, received %s", "value", a.Flags["input"])
-		}
-
-		if a.Positionals[0] != "positional" {
-			t.Fatalf("expected %s, received %s", "positional", a.Positionals[0])
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, "value", a.Flags["input"])
+		expect.Equal(t, "positional", a.Positionals[0])
 	})
 
 	t.Run("flagsPositionalMixed", func(t *testing.T) {
@@ -214,24 +153,10 @@ func TestArgParserParse(t *testing.T) {
 
 		a, err := p.Parse(args)
 
-		if err != nil {
-			t.Fatalf("expected %s, received %s", "nil", err.Error())
-		}
-
-		if a.Flags["input"] != "in" {
-			t.Fatalf("expected %s, received %s", "value", a.Flags["input"])
-		}
-
-		if a.Flags["output"] != "out" {
-			t.Fatalf("expected %s, received %s", "value", a.Flags["output"])
-		}
-
-		if a.Positionals[0] != "pos1" {
-			t.Fatalf("expected %s, received %s", "pos1", a.Positionals[0])
-		}
-
-		if a.Positionals[1] != "pos2" {
-			t.Fatalf("expected %s, received %s", "pos2", a.Positionals[0])
-		}
+		expect.NilError(t, err)
+		expect.Equal(t, "in", a.Flags["input"])
+		expect.Equal(t, "out", a.Flags["output"])
+		expect.Equal(t, "pos1", a.Positionals[0])
+		expect.Equal(t, "pos2", a.Positionals[1])
 	})
 }
